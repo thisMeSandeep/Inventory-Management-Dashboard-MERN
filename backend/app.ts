@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import morgan from "morgan";
+import userRouter from "./routes/user.routes.js";
 
 const app: Express = express();
 
@@ -20,6 +21,9 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("tiny"));
+
+//Api routes
+app.use("/api/v1/user", userRouter);
 
 // test route
 app.get("/", (_req, res) => {
