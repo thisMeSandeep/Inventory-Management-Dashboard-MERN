@@ -13,6 +13,7 @@
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+
     "paths": {
       "@/*": ["./*"]
     },
@@ -23,10 +24,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true
   },
-  "include": [
-    "**/*.ts",
-    "**/*.js"
-  ],
+  "include": ["**/*.ts", "**/*.js"],
   "exclude": [
     "node_modules",
     "dist",
