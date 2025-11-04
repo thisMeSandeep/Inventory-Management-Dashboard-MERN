@@ -1,0 +1,43 @@
+# Node.js dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# dotenv environment variables
+.env
+.env.*.local
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+
+# Build output
+dist/
+build/
+
+# Debug and cache
+.cache/
+.nyc_output/
+coverage/
+*.tsbuildinfo
+
+# Optional: TypeScript
+# (Ignore compiled JS if using TypeScript)
+# Uncomment if needed
+# *.js
+# *.js.map
+
+# Optional: pm2 logs
+.pids
