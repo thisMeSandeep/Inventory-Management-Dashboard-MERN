@@ -147,7 +147,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     const response = await passwordReset(email, token, password);
 
     return res.status(200).json(response);
-  } catch (error) {
+  } catch (error:any) {
     console.error("reset Password Error", error);
 
     if (error instanceof HttpError) {
@@ -239,7 +239,7 @@ export const refreshToken = async (req: Request, res: Response) => {
       success: true,
       message: "Access token refreshed successfully",
     });
-  } catch (error) {
+  } catch (error:any) {
     console.error("Refresh Token Error:", error);
     return res
       .status(500)

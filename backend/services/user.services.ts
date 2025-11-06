@@ -115,7 +115,7 @@ export const passwordForgot = async (email: string) => {
 
 export const passwordReset = async (
   email: string,
-  token: string,
+  token: number,
   password: string
 ) => {
   //  check if email exists
@@ -196,5 +196,11 @@ export const login = async (email: string, password: string, res: Response) => {
   return {
     success: true,
     message: "User logged in successfully",
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
   };
 };
