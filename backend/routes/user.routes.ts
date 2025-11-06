@@ -1,8 +1,16 @@
 import express, { Router } from "express";
-import { register } from "@/controllers/user.controller.js";
+import {
+  emailVerification,
+  forgotPassword,
+  register,
+  resetPassword,
+} from "@/controllers/user.controller.js";
 
 const router: Router = express.Router();
 
 router.post("/register", register);
+router.post("/email-verification", emailVerification);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 export default router;

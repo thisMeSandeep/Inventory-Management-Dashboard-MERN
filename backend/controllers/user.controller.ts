@@ -1,6 +1,13 @@
+import { z } from "zod";
+import {
+  passwordForgot,
+  passwordReset,
+  registerUser,
+  verifyEmail,
+} from "@/services/user.services.js";
 import { userValidation } from "@/validations/userValidation.js";
 import { Request, Response } from "express";
-import { z } from "zod";
+import { HttpError } from "@/errors/httpError.js";
 
 // ---------------- Register controller-----------------
 
@@ -8,9 +15,47 @@ export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
 
-  
-  // validate using zod
     const result = userValidation.safeParse({ name, email, password });
+    if (!result.success) {
+      const pretty = z.prettifyError(result.error);
+      return res.status(400).json({ success: false, message: pretty });
+    }
+
+    const user = await registerUser(name, email, password);
+
+    return res.status(201).json({
+      success: true,
+      message:
+        "User registered successfully. Check your email for verification token.",
+      user,
+    });
+  } catch (error: any) {
+    console.error("Registration Error:", error);
+
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    }
+    // For unexpected errors
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+// ------------------------ email verification controller -----------------------
+
+export const emailVerification = async (req: Request, res: Response) => {
+  const validation = z.object({
+    email: z.email({ error: "Invalid email format" }),
+    token: z.number(),
+  });
+  try {
+    const { email, token } = req.body;
+
+    const result = validation.safeParse({ email, token });
 
     if (!result.success) {
       const pretty = z.prettifyError(result.error);
@@ -19,14 +64,98 @@ export const register = async (req: Request, res: Response) => {
         message: pretty,
       });
     }
-    return res.status(200).json({
-      success: true,
-      message: "User registered successfully",
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+
+    const response = await verifyEmail(email, token);
+
+    return res.status(200).json(response);
+  } catch (error: any) {
+    console.error("Email Verification Error:", error);
+
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    }
+    // For unexpected errors
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
+
+// ----------------------forgot password controller -----------------------
+export const forgotPassword = async (req: Request, res: Response) => {
+  const validation = z.object({
+    email: z.email({ error: "Invalid email format" }),
+  });
+  try {
+    const { email } = req.body;
+    const result = validation.safeParse({ email });
+
+    if (!result.success) {
+      const pretty = z.prettifyError(result.error);
+      return res.status(400).json({
+        success: false,
+        message: pretty,
+      });
+    }
+
+    const response = await passwordForgot(email);
+
+    return res.status(200).json(response);
+  } catch (error: any) {
+    console.error("Forgot Password Error", error);
+
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    }
+    // For unexpected errors
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+//------------------------Reset password controller -----------------------
+export const resetPassword = async (req: Request, res: Response) => {
+  const validation = z.object({
+    email: z.email({ error: "Invalid email format" }),
+    token: z.number(),
+    password: z.string().min(6, "Password must be at least 6 characters long"),
+  });
+
+  try {
+    const { email, token, password } = req.body;
+    const result = validation.safeParse({ email, token, password });
+
+    if (!result.success) {
+      const pretty = z.prettifyError(result.error);
+      return res.status(400).json({
+        success: false,
+        message: pretty,
+      });
+    }
+
+    const response = await passwordReset(email, token, password);
+
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error("reset Password Error", error);
+
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    }
+    // For unexpected errors
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+

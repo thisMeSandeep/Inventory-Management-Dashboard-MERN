@@ -7,7 +7,7 @@ type Email = {
     html: string;
 };
 
-export const sendEmail = async ({ to, subject, text, html }: Email) => {
+export const sendMail = async ({ to, subject, text, html }: Email) => {
   const mailOptions = {
     from: `"Product management" <${process.env.EMAIL_USER}>`,
     to,
@@ -18,7 +18,6 @@ export const sendEmail = async ({ to, subject, text, html }: Email) => {
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log("✅ Email sent:", info.response);
     return info;
   } catch (err) {
     console.error("❌ Error sending email:", err);
