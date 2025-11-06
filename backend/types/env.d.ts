@@ -7,5 +7,7 @@ declare namespace NodeJS {
     EMAIL_USER: string;
     SMTP_PASSWORD: string;
     JWT_SECRET_KEY: string;
+    ACCESS_TOKEN_EXPIRY: string;
+    REFRESH_TOKEN_EXPIRY: string;
   }
 }

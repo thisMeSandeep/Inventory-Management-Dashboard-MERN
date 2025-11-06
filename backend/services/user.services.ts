@@ -8,6 +8,9 @@ import {
   BadRequestError,
 } from "@/errors/httpError.js";
 import { forgotPasswordTemplate } from "@/templates/forgotPasswordTemplate.js";
+import { generateJwtToken } from "@/utils/generateJwtToken.js";
+import { Response } from "express";
+import { cookieOptions } from "@/constants/cookieOption.js";
 
 export const registerUser = async (
   name: string,
@@ -148,5 +151,50 @@ export const passwordReset = async (
   return {
     success: true,
     message: "Your password has been reset successfully",
+  };
+};
+
+export const login = async (email: string, password: string, res: Response) => {
+  // check if user exists
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    throw new NotFoundError("User with this email not found");
+  }
+
+  // check if email is verified
+  if (!user.isVerified) {
+    throw new BadRequestError(
+      "Email is not verified , please verify your email"
+    );
+  }
+
+  // check if password is correct
+  const isPasswordCorrect = await user.comparePassword(password);
+
+  if (!isPasswordCorrect) {
+    throw new BadRequestError("Invalid password");
+  }
+
+  // save access token and refresh token in cookies
+  const accessToken = generateJwtToken(
+    user._id,
+    user.role,
+    process.env.ACCESS_TOKEN_EXPIRY
+  );
+
+  res.cookie("accessToken", accessToken, cookieOptions);
+
+  const refreshToken = generateJwtToken(
+    user._id,
+    user.role,
+    process.env.REFRESH_TOKEN_EXPIRY
+  );
+
+  res.cookie("refreshToken", refreshToken, cookieOptions);
+
+  return {
+    success: true,
+    message: "User logged in successfully",
   };
 };
