@@ -9,5 +9,8 @@ declare namespace NodeJS {
     JWT_SECRET_KEY: string;
     ACCESS_TOKEN_EXPIRY: string;
     REFRESH_TOKEN_EXPIRY: string;
+    CLOUDINARY_API_KEY: string;
+    CLOUDINARY_API_SECRET: string;
+    CLOUDINARY_CLOUD: string;
   }
 }
