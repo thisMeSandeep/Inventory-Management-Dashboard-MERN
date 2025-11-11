@@ -21,8 +21,8 @@ export const register = async (req: Request, res: Response) => {
 
     const result = userValidation.safeParse({ name, email, password });
     if (!result.success) {
-      const pretty = z.prettifyError(result.error);
-      return res.status(400).json({ success: false, message: pretty });
+      const errMessage = result.error.issues[0].message;
+      return res.status(400).json({ success: false, message: errMessage });
     }
 
     const user = await registerUser(name, email, password);
@@ -62,10 +62,10 @@ export const emailVerification = async (req: Request, res: Response) => {
     const result = validation.safeParse({ email, token });
 
     if (!result.success) {
-      const pretty = z.prettifyError(result.error);
+      const errMessage = result.error.issues[0].message;
       return res.status(400).json({
         success: false,
-        message: pretty,
+        message: errMessage,
       });
     }
 
@@ -98,10 +98,10 @@ export const forgotPassword = async (req: Request, res: Response) => {
     const result = validation.safeParse({ email });
 
     if (!result.success) {
-      const pretty = z.prettifyError(result.error);
+      const errMessage = result.error.issues[0].message;
       return res.status(400).json({
         success: false,
-        message: pretty,
+        message: errMessage,
       });
     }
 
@@ -137,17 +137,17 @@ export const resetPassword = async (req: Request, res: Response) => {
     const result = validation.safeParse({ email, token, password });
 
     if (!result.success) {
-      const pretty = z.prettifyError(result.error);
+      const errMessage = result.error.issues[0].message;
       return res.status(400).json({
         success: false,
-        message: pretty,
+        message: errMessage,
       });
     }
 
     const response = await passwordReset(email, token, password);
 
     return res.status(200).json(response);
-  } catch (error:any) {
+  } catch (error: any) {
     console.error("reset Password Error", error);
 
     if (error instanceof HttpError) {
@@ -176,10 +176,10 @@ export const loginUser = async (req: Request, res: Response) => {
     const result = validation.safeParse({ email, password });
 
     if (!result.success) {
-      const pretty = z.prettifyError(result.error);
+      const errMessage = result.error.issues[0].message;
       return res.status(400).json({
         success: false,
-        message: pretty,
+        message: errMessage,
       });
     }
 
@@ -239,7 +239,7 @@ export const refreshToken = async (req: Request, res: Response) => {
       success: true,
       message: "Access token refreshed successfully",
     });
-  } catch (error:any) {
+  } catch (error: any) {
     console.error("Refresh Token Error:", error);
     return res
       .status(500)
