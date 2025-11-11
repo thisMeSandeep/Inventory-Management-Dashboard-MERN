@@ -23,6 +23,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@sindresorhus/slugify": "^3.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
@@ -34,8 +35,9 @@
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.19.2",
+    "mongoose": "^8.19.3",
     "morgan": "^1.10.1",
+    "nanoid": "^5.1.6",
     "nodemailer": "^7.0.10",
     "winston": "^3.18.3",
     "zod": "^4.1.12"
