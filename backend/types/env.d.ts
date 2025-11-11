@@ -14,3 +14,13 @@ declare namespace NodeJS {
     CLOUDINARY_CLOUD: string;
   }
 }
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: import("jsonwebtoken").JwtPayload | string;
+    }
+  }
+}
+
+export {};

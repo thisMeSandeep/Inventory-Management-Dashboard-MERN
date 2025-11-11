@@ -12,6 +12,8 @@ import { generateJwtToken } from "@/utils/generateJwtToken.js";
 import { Response } from "express";
 import { cookieOptions } from "@/constants/cookieOption.js";
 
+
+//--------------- Register user ---------------
 export const registerUser = async (
   name: string,
   email: string,
@@ -46,6 +48,11 @@ export const registerUser = async (
   return { email: user.email };
 };
 
+
+
+
+
+//-------------------- Verify email ---------------
 export const verifyEmail = async (email: string, token: number) => {
   // check if email exists
   const user = await User.findOne({ email });
@@ -76,6 +83,7 @@ export const verifyEmail = async (email: string, token: number) => {
   };
 };
 
+//--------------- forgot password ---------------
 export const passwordForgot = async (email: string) => {
   //  check if email exists
   const user = await User.findOne({ email });
@@ -113,6 +121,8 @@ export const passwordForgot = async (email: string) => {
   };
 };
 
+
+//--------------- reset password ---------------
 export const passwordReset = async (
   email: string,
   token: number,
@@ -154,6 +164,7 @@ export const passwordReset = async (
   };
 };
 
+//--------------- login ---------------
 export const login = async (email: string, password: string, res: Response) => {
   // check if user exists
   const user = await User.findOne({ email }).select("+password");
@@ -180,7 +191,7 @@ export const login = async (email: string, password: string, res: Response) => {
   const accessToken = generateJwtToken(
     user._id,
     user.role,
-    process.env.ACCESS_TOKEN_EXPIRY
+    process.env.ACCESS_TOKEN_EXPIRY!
   );
 
   res.cookie("accessToken", accessToken, cookieOptions);
@@ -188,7 +199,7 @@ export const login = async (email: string, password: string, res: Response) => {
   const refreshToken = generateJwtToken(
     user._id,
     user.role,
-    process.env.REFRESH_TOKEN_EXPIRY
+    process.env.REFRESH_TOKEN_EXPIRY!
   );
 
   res.cookie("refreshToken", refreshToken, cookieOptions);

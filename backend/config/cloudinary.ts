@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import path from "path";
 
 // Configure Cloudinary
 cloudinary.config({
@@ -9,13 +10,21 @@ cloudinary.config({
 
 export const uploadToCloudinary = async (filePath: string, folder: string) => {
   try {
-    const result = await cloudinary.uploader.upload(filePath, {
+    // Convert relative path to absolute path
+    const absolutePath = path.isAbsolute(filePath)
+      ? filePath
+      : path.resolve(process.cwd(), filePath);
+
+    const result = await cloudinary.uploader.upload(absolutePath, {
       folder,
       resource_type: "image",
     });
     return result.secure_url;
-  } catch (err) {
+  } catch (err: any) {
     console.error("Cloudinary upload error:", err);
-    throw new Error("Failed to upload file to Cloudinary");
+    console.error("Attempted file path:", filePath);
+    throw new Error(
+      `Failed to upload file to Cloudinary: ${err.message || "Unknown error"}`
+    );
   }
 };

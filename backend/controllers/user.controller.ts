@@ -230,7 +230,7 @@ export const refreshToken = async (req: Request, res: Response) => {
     const newAccessToken = generateJwtToken(
       id,
       role,
-      process.env.ACCESS_TOKEN_EXPIRY
+      process.env.ACCESS_TOKEN_EXPIRY!
     );
 
     res.cookie("accessToken", newAccessToken, cookieOptions);
