@@ -1,6 +1,6 @@
 import User from "@/models/user.model.js";
-import { emailVarificationTemplate } from "@/templates/emailVarification.js";
-import { generateToken } from "@/utils/generateToke.js";
+import { emailVerificationTemplate } from "@/templates/emailVerification.js";
+import { generateToken } from "@/utils/generateToken.js";
 import { sendMail } from "@/utils/sendMail.js";
 import {
   ConflictError,
@@ -40,7 +40,7 @@ export const registerUser = async (
     to: email,
     subject: "Email Verification",
     text: `Your email verification token is ${token}`,
-    html: emailVarificationTemplate(token, name, 10),
+    html: emailVerificationTemplate(token, name, 10),
   });
 
   if (!mailRes) throw new Error("Failed to send verification email");

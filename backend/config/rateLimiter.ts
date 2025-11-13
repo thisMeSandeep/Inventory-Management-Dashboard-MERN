@@ -5,6 +5,6 @@ export const authLimiter = rateLimit({
   max: 5, // Only 5 failed logins allowed
   message: {
     status: 429,
-    message: "Too many login attempts, try again later.",
+    message: "Too many  attempts, try again later.",
   },
 });

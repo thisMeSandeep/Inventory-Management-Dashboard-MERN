@@ -15,7 +15,7 @@ const categoryEnum = [
   "health",
   "automotive",
   "other",
-] as const;
+];
 
 const productBaseSchema = z.object({
   name: z.string().trim().min(1, "Product name is required"),
@@ -48,7 +48,9 @@ const productBaseSchema = z.object({
       return isNaN(parsed) ? 0 : parsed;
     }
     return val;
-  }, z.number().min(0, "Discount cannot be negative").max(100, "Discount cannot exceed 100%").optional().default(0)),
+  }, z.number().min(0, "Discount cannot be negative").max(100, "Discount cannot exceed 100%"))
+    .optional()
+    .default(0),
   stock: z.preprocess((val) => {
     if (val === "" || val === undefined || val === null) return 0;
     if (typeof val === "string") {
@@ -69,7 +71,12 @@ const productBaseSchema = z.object({
         }
       }
       return val;
-    }, z.array(z.string().trim().min(1, "Tag cannot be empty").max(30, "Tag must be at most 30 characters")).max(10, "No more than 10 tags are allowed").optional())
+    }, z
+      .array(
+        z.string().trim().min(1, "Tag cannot be empty").max(30, "Tag must be at most 30 characters")
+      )
+      .max(10, "No more than 10 tags are allowed")
+      .optional())
     .optional(),
 });
 

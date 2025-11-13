@@ -9,7 +9,7 @@ import {
 import {
   createProductSchema,
   updateProductSchema,
-} from "@/validations/productvalidation.js";
+} from "@/validations/productValidation.js";
 import { Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
 
