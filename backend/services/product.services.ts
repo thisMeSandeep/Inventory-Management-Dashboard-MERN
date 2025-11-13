@@ -82,3 +82,151 @@ export const createProductService = async (
 
   return product;
 };
+
+// --------------- Get all products-----------------
+// ---------------- Pagination , Filtering and Sorting ----------------
+// ------------------ Filtering - based on category, price range, tag -----------------
+// ------------------ Sorting - based on price, rating -----------------
+// ------------------ Pagination - limit and skip -----------------
+export const getAllProductsService = async (req: Request) => {
+  const {
+    page = 1,
+    limit = 10,
+    category,
+    minPrice,
+    maxPrice,
+    tag,
+    sortBy,
+  } = req.query;
+
+  const filter: any = {};
+
+  if (category) filter.category = category;
+
+  if (minPrice || maxPrice) {
+    filter.price = {};
+    if (minPrice) filter.price.$gte = Number(minPrice);
+    if (maxPrice) filter.price.$lte = Number(maxPrice);
+  }
+
+  if (tag) filter.tags = tag;
+
+  const sort = sortBy ? (sortBy as string).split(",").join(" ") : undefined;
+
+  const skip = (Number(page) - 1) * Number(limit);
+
+  // get products
+  let query = Product.find(filter);
+
+  if (sort) {
+    query = query.sort(sort);
+  }
+
+  const products = await query.skip(skip).limit(Number(limit));
+
+  // get total count
+  const totalProducts = await Product.countDocuments(filter);
+
+  // calculate total pages
+  const totalPages = Math.ceil(totalProducts / Number(limit));
+
+  return {
+    products,
+    pagination: {
+      totalProducts,
+      totalPages,
+      currentPage: Number(page),
+      limit: Number(limit),
+    },
+  };
+};
+
+// --------------- Update a product-----------------
+
+export const updateProductService = async (
+  userId: string,
+  productId: string,
+  validatedData: Partial<CreateProductInput>,
+  req: Request
+) => {
+  // check if user exists
+  const user = await User.findById(userId);
+  if (!user) throw new NotFoundError("User not found");
+
+  // check if product exists
+  const product = await Product.findById(productId);
+  if (!product) throw new NotFoundError("Product not found");
+
+  // check if user is the owner of the product
+  if (product.userId.toString() !== userId) {
+    throw new BadRequestError("You are not authorized to update this product");
+  }
+
+  // Prepare update data with only validated text fields
+  const updateData: any = { ...validatedData };
+
+  // Handle files separately
+  if (req.files && !Array.isArray(req.files)) {
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+    // handle thumbnail update
+    if (files["thumbnail"] && files["thumbnail"][0]) {
+      const thumbnail = files["thumbnail"][0].path;
+      const thumbnailUrl = await uploadToCloudinary(
+        thumbnail,
+        `products/${product.name}/thumbnail`
+      );
+      updateData.thumbnail = thumbnailUrl;
+    }
+
+    // handle images update
+    if (files["images"] && files["images"].length > 0) {
+      const images = files["images"].map(
+        (file: Express.Multer.File) => file.path
+      );
+      const imagesUrls = await Promise.all(
+        images.map((image: string) =>
+          uploadToCloudinary(image, `products/${product.name}/images`)
+        )
+      );
+      updateData.images = imagesUrls;
+    }
+  }
+
+  // update product
+  const updatedProduct = await Product.findByIdAndUpdate(
+    productId,
+    updateData,
+    { new: true, runValidators: true }
+  );
+
+  return updatedProduct;
+};
+
+// --------------- Delete a product-----------------
+export const deleteProductService = async (
+  userId: string,
+  productId: string
+) => {
+  // check if user exists
+  const user = await User.findById(userId);
+  if (!user) throw new NotFoundError("User not found");
+  // check if product exists
+  const product = await Product.findById(productId);
+  if (!product) throw new NotFoundError("Product not found");
+  // check if user is the owner of the product
+  if (product.userId.toString() !== userId) {
+    throw new BadRequestError("You are not authorized to delete this product");
+  }
+  // delete product
+  const deletedProduct = await Product.findByIdAndDelete(productId);
+  return deletedProduct;
+};
+
+// --------------- Get a single product-----------------
+export const getProductService = async (productId: string) => {
+  // check if product exists
+  const product = await Product.findById(productId);
+  if (!product) throw new NotFoundError("Product not found");
+  return product;
+};

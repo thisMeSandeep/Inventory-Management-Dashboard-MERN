@@ -1,11 +1,19 @@
 import { z } from "zod";
 
-const audienceEnum = ["men", "women", "children"] as const;
+const audienceEnum = ["men", "women", "children","all"] as const;
 const categoryEnum = [
   "clothing",
   "electronics",
   "footwear",
   "beauty",
+  "accessories",
+  "sports",
+  "home",
+  "books",
+  "toys",
+  "jewelry",
+  "health",
+  "automotive",
   "other",
 ] as const;
 

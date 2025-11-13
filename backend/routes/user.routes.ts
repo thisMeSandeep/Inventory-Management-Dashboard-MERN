@@ -10,11 +10,12 @@ import {
 
 const router: Router = express.Router();
 
-router.post("/register", register);
-router.post("/email-verification", emailVerification);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password", resetPassword);
-router.post("/login", loginUser);
-router.post("/refresh-token", refreshToken);
+
+router.post("/register", register); //user registration
+router.post("/email-verification", emailVerification); //email verification
+router.post("/forgot-password", forgotPassword); //forgot password
+router.post("/reset-password", resetPassword); //reset password
+router.post("/login", loginUser); //user login
+router.post("/refresh-token", refreshToken); //refresh token
 
 export default router;

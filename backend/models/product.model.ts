@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import slugify from "@sindresorhus/slugify";
 import { nanoid } from "nanoid";
 
+
 const productSchema = new mongoose.Schema(
   {
     userId: {
@@ -16,12 +17,26 @@ const productSchema = new mongoose.Schema(
     brand: { type: String, trim: true },
     audience: {
       type: String,
-      enum: ["men", "women", "children"],
+      enum: ["men", "women", "children", "all"],
       required: true,
     },
     category: {
       type: String,
-      enum: ["clothing", "electronics", "footwear", "beauty", "other"],
+      enum: [
+        "clothing",
+        "electronics",
+        "footwear",
+        "beauty",
+        "accessories",
+        "sports",
+        "home",
+        "books",
+        "toys",
+        "jewelry",
+        "health",
+        "automotive",
+        "other",
+      ],
       required: true,
     },
     tags: [{ type: String }],
@@ -34,14 +49,13 @@ const productSchema = new mongoose.Schema(
     thumbnail: { type: String },
     rating: { type: Number, default: 0 },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 productSchema.index({ category: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ tags: 1 });
 productSchema.index({ name: "text", description: "text" });
-
 
 productSchema.pre("validate", function (next) {
   if (this.name && !this.slug) {
