@@ -7,7 +7,7 @@ import {
   register,
   resetPassword,
 } from "@/controllers/user.controller.js";
-import { authLimiter } from "@/config/rateLimiter.js";
+import { authLimiter } from "@/middlewares/rateLimiter.js";
 
 const router: Router = express.Router();
 

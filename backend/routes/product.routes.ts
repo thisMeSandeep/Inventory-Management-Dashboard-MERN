@@ -1,4 +1,4 @@
-import upload from "@/config/multer.js";
+import upload from "@/middlewares/multer.js";
 import {
   createProduct,
   deleteProduct,

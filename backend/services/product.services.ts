@@ -24,9 +24,9 @@ export const createProductService = async (
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("User not found");
 
-  const thumbnail = files["thumbnail"]?.[0]?.path;
+  const thumbnail = files["thumbnail"]?.[0]?.buffer;
   const images = (files["images"] || []).map(
-    (file: Express.Multer.File) => file.path
+    (file: Express.Multer.File) => file.buffer
   );
 
   if (!thumbnail) throw new BadRequestError("Thumbnail is required");
@@ -55,7 +55,7 @@ export const createProductService = async (
     `products/${name}/thumbnail`
   );
   const imagesUrls = await Promise.all(
-    images.map((image: string) =>
+    images.map((image: Buffer) =>
       uploadToCloudinary(image, `products/${name}/images`)
     )
   );
@@ -171,7 +171,7 @@ export const updateProductService = async (
 
     // handle thumbnail update
     if (files["thumbnail"] && files["thumbnail"][0]) {
-      const thumbnail = files["thumbnail"][0].path;
+      const thumbnail = files["thumbnail"][0].buffer;
       const thumbnailUrl = await uploadToCloudinary(
         thumbnail,
         `products/${product.name}/thumbnail`
@@ -182,10 +182,10 @@ export const updateProductService = async (
     // handle images update
     if (files["images"] && files["images"].length > 0) {
       const images = files["images"].map(
-        (file: Express.Multer.File) => file.path
+        (file: Express.Multer.File) => file.buffer
       );
       const imagesUrls = await Promise.all(
-        images.map((image: string) =>
+        images.map((image: Buffer) =>
           uploadToCloudinary(image, `products/${product.name}/images`)
         )
       );
