@@ -12,6 +12,7 @@ declare namespace NodeJS {
     CLOUDINARY_API_KEY: string;
     CLOUDINARY_API_SECRET: string;
     CLOUDINARY_CLOUD: string;
+    REDIS_URL: string;
   }
 }
 

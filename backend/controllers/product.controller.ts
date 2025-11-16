@@ -13,6 +13,7 @@ import {
 import { Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
 
+
 // -------------------- Create a Product---------------------
 export const createProduct = async (req: Request, res: Response) => {
   try {

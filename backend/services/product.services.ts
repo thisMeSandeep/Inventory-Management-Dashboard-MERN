@@ -5,6 +5,7 @@ import User from "@/models/user.model.js";
 import { CreateProductInput } from "@/validations/productValidation.js";
 import { Request } from "express";
 import { JwtPayload } from "jsonwebtoken";
+import { io } from "@/server.js";
 
 // --------------- Create a product-----------------
 export const createProductService = async (
@@ -79,6 +80,8 @@ export const createProductService = async (
   });
 
   await product.save();
+
+  io.emit("product:create", `${user.name} added a new product`);
 
   return product;
 };
@@ -220,6 +223,9 @@ export const deleteProductService = async (
   }
   // delete product
   const deletedProduct = await Product.findByIdAndDelete(productId);
+
+  io.emit("product:delete", `${user.name} deleted a product`);
+
   return deletedProduct;
 };
 
