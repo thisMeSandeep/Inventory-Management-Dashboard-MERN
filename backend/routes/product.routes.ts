@@ -22,7 +22,7 @@ router.route("/product").post(
 );
 
 // update a product
-router.route("/product/:productId").put(
+router.route("/product/:slug").put(
   authMiddleware,
   upload.fields([
     { name: "thumbnail", maxCount: 1 },
@@ -35,9 +35,9 @@ router.route("/product/:productId").put(
 router.route("/products").get(authMiddleware, getAllProducts);
 
 // get single product
-router.route("/product/:productId").get(authMiddleware, getProduct);
+router.route("/product/:slug").get(authMiddleware, getProduct);
 
 // delete a product
-router.route("/product/:productId").delete(authMiddleware, deleteProduct);
+router.route("/product/:slug").delete(authMiddleware, deleteProduct);
 
 export default router;

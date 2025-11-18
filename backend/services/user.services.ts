@@ -10,7 +10,7 @@ import {
 import { forgotPasswordTemplate } from "@/templates/forgotPasswordTemplate.js";
 import { generateJwtToken } from "@/utils/generateJwtToken.js";
 import { Response } from "express";
-import { cookieOptions } from "@/constants/cookieOption.js";
+import { getCookieOptions } from "@/constants/cookieOption.js";
 import redis from "@/config/redis.js";
 
 //--------------- Register user ---------------
@@ -197,7 +197,8 @@ export const login = async (email: string, password: string, res: Response) => {
     process.env.ACCESS_TOKEN_EXPIRY!
   );
 
-  res.cookie("accessToken", accessToken, cookieOptions);
+  // 15 minutes
+  res.cookie("accessToken", accessToken, getCookieOptions(15 * 60 * 1000));
 
   const refreshToken = generateJwtToken(
     user._id,
@@ -205,16 +206,24 @@ export const login = async (email: string, password: string, res: Response) => {
     process.env.REFRESH_TOKEN_EXPIRY!
   );
 
-  res.cookie("refreshToken", refreshToken, cookieOptions);
+  // 7 days
+  res.cookie("refreshToken", refreshToken, getCookieOptions(7 * 24 * 60 * 60 * 1000));
+
+  const userData = {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
+
+  // Cache user data in Redis for 30 minutes
+  await redis.set(`user:${user._id}`, JSON.stringify(userData), {
+    EX: 30 * 60,
+  });
 
   return {
     success: true,
     message: "User logged in successfully",
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    },
+    user: userData,
   };
 };

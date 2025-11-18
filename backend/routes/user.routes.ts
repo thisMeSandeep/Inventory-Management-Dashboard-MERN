@@ -2,8 +2,9 @@ import express, { Router } from "express";
 import {
   emailVerification,
   forgotPassword,
+  getCurrentUser,
   loginUser,
-  refreshToken,
+  logoutUser,
   register,
   resetPassword,
 } from "@/controllers/user.controller.js";
@@ -16,6 +17,7 @@ router.post("/email-verification", emailVerification); //email verification
 router.post("/forgot-password", authLimiter, forgotPassword); //forgot password
 router.post("/reset-password", authLimiter, resetPassword); //reset password
 router.post("/login", authLimiter, loginUser); //user login
-router.post("/refresh-token", authLimiter, refreshToken); //refresh token
+router.get("/me", getCurrentUser); //get current user (auto-login)
+router.post("/logout", logoutUser); //logout user
 
 export default router;

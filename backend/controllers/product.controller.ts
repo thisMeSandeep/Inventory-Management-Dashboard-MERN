@@ -73,8 +73,8 @@ export const getAllProducts = async (req: Request, res: Response) => {
 
 //----------------------- Update a product---------------------
 export const updateProduct = async (req: Request, res: Response) => {
-  // get product id from params
-  const { productId } = req.params;
+  // get product slug from params
+  const { slug } = req.params;
   // get user id from req.user
   const userId = (req.user as JwtPayload).id;
   const result = updateProductSchema.safeParse(req.body);
@@ -85,7 +85,7 @@ export const updateProduct = async (req: Request, res: Response) => {
   try {
     const updatedProduct = await updateProductService(
       userId,
-      productId,
+      slug,
       result.data,
       req
     );
@@ -112,10 +112,10 @@ export const updateProduct = async (req: Request, res: Response) => {
 // -------------------Delete a product---------------------
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
-    const { productId } = req.params;
+    const { slug } = req.params;
     const userId = (req.user as JwtPayload).id;
     // Call service to delete product
-    const deletedProduct = await deleteProductService(userId, productId);
+    const deletedProduct = await deleteProductService(userId, slug);
     return res.status(200).json({
       success: true,
       message: "Product deleted successfully",
@@ -138,9 +138,9 @@ export const deleteProduct = async (req: Request, res: Response) => {
 // ------------------ Get a single product ---------------------
 export const getProduct = async (req: Request, res: Response) => {
   try {
-    const { productId } = req.params;
+    const { slug } = req.params;
     // Call service to get single product
-    const product = await getProductService(productId);
+    const product = await getProductService(slug);
     return res.status(200).json({
       success: true,
       message: "Product retrieved successfully",
@@ -159,3 +159,4 @@ export const getProduct = async (req: Request, res: Response) => {
       .json({ success: false, message: "Internal Server Error" });
   }
 };
+

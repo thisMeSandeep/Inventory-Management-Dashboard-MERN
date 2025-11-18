@@ -148,7 +148,7 @@ export const getAllProductsService = async (req: Request) => {
 
 export const updateProductService = async (
   userId: string,
-  productId: string,
+  slug: string,
   validatedData: Partial<CreateProductInput>,
   req: Request
 ) => {
@@ -157,7 +157,7 @@ export const updateProductService = async (
   if (!user) throw new NotFoundError("User not found");
 
   // check if product exists
-  const product = await Product.findById(productId);
+  const product = await Product.findOne({ slug });
   if (!product) throw new NotFoundError("Product not found");
 
   // check if user is the owner of the product
@@ -197,8 +197,8 @@ export const updateProductService = async (
   }
 
   // update product
-  const updatedProduct = await Product.findByIdAndUpdate(
-    productId,
+  const updatedProduct = await Product.findOneAndUpdate(
+    { slug },
     updateData,
     { new: true, runValidators: true }
   );
@@ -209,20 +209,20 @@ export const updateProductService = async (
 // --------------- Delete a product-----------------
 export const deleteProductService = async (
   userId: string,
-  productId: string
+  slug: string
 ) => {
   // check if user exists
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("User not found");
   // check if product exists
-  const product = await Product.findById(productId);
+  const product = await Product.findOne({ slug });
   if (!product) throw new NotFoundError("Product not found");
   // check if user is the owner of the product
   if (product.userId.toString() !== userId) {
     throw new BadRequestError("You are not authorized to delete this product");
   }
   // delete product
-  const deletedProduct = await Product.findByIdAndDelete(productId);
+  const deletedProduct = await Product.findOneAndDelete({ slug });
 
   io.emit("product:delete", `${user.name} deleted a product`);
 
@@ -230,9 +230,9 @@ export const deleteProductService = async (
 };
 
 // --------------- Get a single product-----------------
-export const getProductService = async (productId: string) => {
+export const getProductService = async (slug: string) => {
   // check if product exists
-  const product = await Product.findById(productId);
+  const product = await Product.findOne({ slug });
   if (!product) throw new NotFoundError("Product not found");
   return product;
 };

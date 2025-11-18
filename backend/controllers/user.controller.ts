@@ -11,7 +11,9 @@ import { userValidation } from "@/validations/userValidation.js";
 import { Request, Response } from "express";
 import { HttpError } from "@/errors/httpError.js";
 import { generateJwtToken } from "@/utils/generateJwtToken.js";
-import { cookieOptions } from "@/constants/cookieOption.js";
+import { getCookieOptions } from "@/constants/cookieOption.js";
+import User from "@/models/user.model.js";
+import redis from "@/config/redis.js";
 
 // ---------------- Register controller-----------------
 
@@ -202,19 +204,130 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
-//------------------------ refresh access token controller -----------------------
-
-export const refreshToken = async (req: Request, res: Response) => {
+// ------------------------- get current user controller ----------------------
+export const getCurrentUser = async (req: Request, res: Response) => {
   try {
+    const accessToken = req.cookies.accessToken;
+
+    // if access token is valid , return user
+    if (accessToken) {
+      try {
+        // decode token
+        const decoded = jwt.verify(
+          accessToken,
+          process.env.JWT_SECRET_KEY!
+        ) as jwt.JwtPayload;
+
+        // Check Redis cache first
+        const cachedUser = await redis.get(`user:${decoded.id}`);
+        if (cachedUser) {
+          return res.status(200).json({
+            success: true,
+            message: "User retrieved successfully",
+            data: JSON.parse(cachedUser),
+          });
+        }
+
+        // get the user from database
+        const user = await User.findById(decoded.id).select("-password");
+
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: "User not found",
+          });
+        }
+
+        const userData = {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        };
+
+        // Cache user data for 30 minutes
+        await redis.set(`user:${user._id}`, JSON.stringify(userData), {
+          EX: 30 * 60,
+        });
+
+        return res.status(200).json({
+          success: true,
+          message: "User retrieved successfully",
+          data: userData,
+        });
+      } catch (err) {
+        // Access token invalid/expired, fall through to refresh token
+        console.log("Access token invalid, trying refresh token");
+      }
+    }
+
+    // use refresh token if access token is not present or expired
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    let decoded: any;
     try {
-      decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!);
+      const decoded = jwt.verify(
+        refreshToken,
+        process.env.JWT_SECRET_KEY!
+      ) as jwt.JwtPayload;
+
+      // Check Redis cache first
+      const cachedUser = await redis.get(`user:${decoded.id}`);
+      if (cachedUser) {
+        // create a new access token
+        const newAccessToken = generateJwtToken(
+          decoded.id,
+          decoded.role,
+          process.env.ACCESS_TOKEN_EXPIRY!
+        );
+        res.cookie("accessToken", newAccessToken, getCookieOptions(15 * 60 * 1000));
+
+        return res.status(200).json({
+          success: true,
+          message: "User retrieved successfully",
+          data: JSON.parse(cachedUser),
+        });
+      }
+
+      // get the user from database
+      const user = await User.findById(decoded.id).select("-password");
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      const userData = {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      };
+
+      // Cache user data for 30 minutes
+      await redis.set(`user:${user._id}`, JSON.stringify(userData), {
+        EX: 30 * 60,
+      });
+
+      // create a new access token
+      const newAccessToken = generateJwtToken(
+        user._id,
+        user.role,
+        process.env.ACCESS_TOKEN_EXPIRY!
+      );
+      res.cookie("accessToken", newAccessToken, getCookieOptions(15 * 60 * 1000));
+
+      return res.status(200).json({
+        success: true,
+        message: "User retrieved successfully",
+        data: userData,
+      });
     } catch (err: any) {
+      // Handle refresh token errors
       if (err.name === "TokenExpiredError") {
         return res
           .status(401)
@@ -224,23 +337,40 @@ export const refreshToken = async (req: Request, res: Response) => {
         .status(403)
         .json({ success: false, message: "Invalid refresh token" });
     }
+  } catch (error: any) {
+    console.error("Get Current User Error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
 
-    const { id, role } = decoded;
+//------------------logout user controller ----------------------
+export const logoutUser = async (req: Request, res: Response) => {
+  try {
+    // Get user Id from token before clearing cookies
+    const accessToken = req.cookies.accessToken;
+    if (accessToken) {
+      try {
+        const decoded = jwt.verify(
+          accessToken,
+          process.env.JWT_SECRET_KEY!
+        ) as jwt.JwtPayload;
+        // Clear user cache from Redis
+        await redis.del(`user:${decoded.id}`);
+      } catch (err) {
+        console.log("Error clearing user cache from Redis:", err);
+      }
+    }
 
-    const newAccessToken = generateJwtToken(
-      id,
-      role,
-      process.env.ACCESS_TOKEN_EXPIRY!
-    );
-
-    res.cookie("accessToken", newAccessToken, cookieOptions);
-
+    res.clearCookie("accessToken", getCookieOptions(0));
+    res.clearCookie("refreshToken", getCookieOptions(0));
     return res.status(200).json({
       success: true,
-      message: "Access token refreshed successfully",
+      message: "logged out successfully",
     });
   } catch (error: any) {
-    console.error("Refresh Token Error:", error);
+    console.error("Logout User Error:", error);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
