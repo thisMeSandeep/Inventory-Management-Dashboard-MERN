@@ -1,22 +1,25 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useLocation } from 'react-router-dom';
-import { useState } from 'react';
-import { Mail, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Mail } from 'lucide-react';
 import Input from '../../components/UI/Input';
 import Button from '../../components/UI/Button';
 import { emailVerificationSchema, type EmailVerificationFormData } from '../../schemas/authSchemas';
+import EmailVerifiedScreen from '../../components/EmailVerifiedScreen';
+import { useVerifyEmail, useResendVerification } from '../../hooks/useAuth';
 
 // ---  Main Form Component ---
 export default function EmailVerification() {
   const location = useLocation();
   const emailFromState = location.state?.email || '';
   const [isVerified, setIsVerified] = useState(false);
+  const [countdown, setCountdown] = useState(0);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<EmailVerificationFormData>({
     resolver: zodResolver(emailVerificationSchema),
     defaultValues: {
@@ -24,37 +27,46 @@ export default function EmailVerification() {
     },
   });
 
+  const { mutate: verifyEmailMutate, isPending } = useVerifyEmail();
+  const { mutate: resendEmail, isPending: isResending } = useResendVerification();
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
+
   const onSubmit = (data: EmailVerificationFormData) => {
-    console.log('Email Verification Submitted:', data);
-    // Simulate verification success
-    setTimeout(() => setIsVerified(true), 1000);
+    verifyEmailMutate(
+      {
+        email: data.email,
+        token: Number(data.token), 
+      },
+      {
+        onSuccess: () => {
+          setIsVerified(true);
+        },
+      }
+    );
   };
+
+  const handleResendCode = () => {
+    if (emailFromState) {
+      resendEmail(emailFromState, {
+        onSuccess: () => {
+          setCountdown(60); // Start 60 second countdown
+        },
+      });
+    }
+  };
+
+  const isResendDisabled = isResending || countdown > 0;
 
   if (isVerified) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white p-4">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle className="h-8 w-8 text-green-600" />
-            </div>
-            <h2 className="text-2xl font-bold tracking-tight text-black">
-              Email Verified!
-            </h2>
-            <p className="mt-2 text-sm text-neutral-600">
-              Your email has been successfully verified.
-            </p>
-          </div>
-
-          <div className="border border-neutral-200 p-6 rounded-sm">
-            <Link to="/login">
-              <Button className="w-full">
-                Continue to Login
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
+      <EmailVerifiedScreen />
     );
   }
 
@@ -102,8 +114,8 @@ export default function EmailVerification() {
             />
           </div>
 
-          <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting} className="w-full">
-            {isSubmitting ? 'Verifying...' : 'Verify Email'}
+          <Button type="submit" disabled={isPending} isLoading={isPending} className="w-full">
+            {isPending ? 'Verifying...' : 'Verify Email'}
           </Button>
 
           <div className="space-y-3">
@@ -111,10 +123,11 @@ export default function EmailVerification() {
               Didn't receive the code?{' '}
               <button
                 type="button"
-                className="font-medium text-black hover:underline"
-                onClick={() => console.log('Resend code')}
+                className="font-medium text-black hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleResendCode}
+                disabled={isResendDisabled}
               >
-                Resend
+                {isResending ? 'Sending...' : countdown > 0 ? `Resend in ${countdown}s` : 'Resend'}
               </button>
             </div>
             <div className="text-center text-sm text-neutral-600">

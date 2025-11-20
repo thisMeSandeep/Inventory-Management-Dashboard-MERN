@@ -1,7 +1,7 @@
 import axiosInstance from "../lib/axios";
 
 // --------------------register user------------------
-type RegisterData = {
+export type RegisterData = {
   name: string;
   email: string;
   password: string;
@@ -13,11 +13,16 @@ export const registerUser = (data: RegisterData) => {
 // --------------------verify email------------------
 type VerifyEmailData = {
   email: string;
-  token: string;
+  token: number;
 };
 
 export const verifyEmail = (data: VerifyEmailData) => {
-  return axiosInstance.post("/user/verify-email", data);
+  return axiosInstance.post("/user/email-verification", data);
+};
+
+// --------------------resend verification email------------------
+export const resendVerificationEmail = (email: string) => {
+  return axiosInstance.post("/user/resend-verification", { email });
 };
 
 // --------------------login user------------------
@@ -40,7 +45,7 @@ export const forgotPassword = (data: ForgotPasswordData) => {
 // --------------------reset password------------------
 type ResetPasswordData = {
   email: string;
-  token: string;
+  token: number;
   password: string;
 };
 export const resetPassword = (data: ResetPasswordData) => {

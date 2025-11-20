@@ -2,25 +2,32 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Input from '../../components/UI/Input';
 import Button from '../../components/UI/Button';
 import { loginSchema, type LoginFormData } from '../../schemas/authSchemas';
+import { useLogin } from '../../hooks/useAuth';
 
 // ---  Main Form Component ---
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+  const { mutate: login, isPending } = useLogin();
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
   const onSubmit = (data: LoginFormData) => {
-    console.log('Form Submitted:', data);
+    login(data, {
+      onSuccess: () => {
+        navigate('/dashboard/products');
+      },
+    });
   };
 
   return (
@@ -77,8 +84,8 @@ export default function LoginForm() {
             </div>
           </div>
 
-          <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting}>
-            {isSubmitting ? 'Signing in...' : 'Sign in'}
+          <Button type="submit" disabled={isPending} isLoading={isPending}>
+            {isPending ? 'Signing in...' : 'Sign in'}
           </Button>
 
           <div className="text-center text-sm text-neutral-600">

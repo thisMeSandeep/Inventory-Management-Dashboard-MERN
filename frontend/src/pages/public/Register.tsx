@@ -6,25 +6,35 @@ import { Link, useNavigate } from 'react-router-dom';
 import Input from '../../components/UI/Input';
 import Button from '../../components/UI/Button';
 import { registerSchema, type RegisterFormData } from '../../schemas/authSchemas';
+import { useRegister } from '../../hooks/useAuth';
 
 
 // ---  Main Form Component ---
 export default function RegisterForm() {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    reset,
+    formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = (data: RegisterFormData) => {
-    console.log('Form Submitted:', data);
-    // After successful registration, navigate to email verification
-    // navigate('/verify-email', { state: { email: data.email } });
+  const { mutate: registerMutate, isPending } = useRegister();
+
+  const onSubmit = async (data: RegisterFormData) => {
+    registerMutate(data, {
+      onSuccess: (response) => {
+        reset();
+        // Navigate to email verification with the registered email
+        navigate('/verify-email', {
+          state: { email: response.data.user.email }
+        });
+      },
+    });
   };
 
   return (
@@ -83,8 +93,8 @@ export default function RegisterForm() {
             </div>
           </div>
 
-          <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting}>
-            {isSubmitting ? 'Creating account...' : 'Create account'}
+          <Button type="submit" disabled={isPending} isLoading={isPending}>
+            {isPending ? 'Creating account...' : 'Create account'}
           </Button>
 
           <div className="text-center text-sm text-neutral-600">

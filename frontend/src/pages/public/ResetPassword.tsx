@@ -1,36 +1,26 @@
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff, KeyRound } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Input from '../../components/UI/Input';
 import Button from '../../components/UI/Button';
-
-// --- Zod Schema Definition ---
-const resetPasswordSchema = z.object({
-  email: z.email({ message: 'Please enter a valid email address' }),
-  token: z.string().length(6, { message: 'Token must be 6 digits' }).regex(/^\d+$/, { message: 'Token must contain only numbers' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-  confirmPassword: z.string().min(6, { message: 'Please confirm your password' }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword'],
-});
-
-type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
+import { resetPasswordSchema, type ResetPasswordFormData } from '../../schemas/authSchemas';
+import { useResetPassword } from '../../hooks/useAuth';
 
 // ---  Main Form Component ---
 export default function ResetPassword() {
   const location = useLocation();
+  const navigate = useNavigate();
   const emailFromState = location.state?.email || '';
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { mutate: resetPasswordMutate, isPending } = useResetPassword();
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
@@ -39,7 +29,20 @@ export default function ResetPassword() {
   });
 
   const onSubmit = (data: ResetPasswordFormData) => {
-    console.log('Reset Password Submitted:', data);
+    resetPasswordMutate(
+      {
+        email: data.email,
+        token: Number(data.token),
+        password: data.password,
+      },
+      {
+        onSuccess: () => {
+          setTimeout(() => {
+            navigate('/login');
+          }, 1500);
+        },
+      }
+    );
   };
 
   return (
@@ -121,8 +124,8 @@ export default function ResetPassword() {
             </div>
           </div>
 
-          <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting} className="w-full">
-            {isSubmitting ? 'Resetting password...' : 'Reset Password'}
+          <Button type="submit" disabled={isPending} isLoading={isPending} className="w-full">
+            {isPending ? 'Resetting password...' : 'Reset Password'}
           </Button>
 
           <div className="text-center text-sm text-neutral-600">

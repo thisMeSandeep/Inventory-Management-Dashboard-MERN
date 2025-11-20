@@ -1,86 +1,65 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { MailQuestion, Send } from 'lucide-react';
-import { useState } from 'react';
+import { MailQuestion } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Input from '../../components/UI/Input';
 import Button from '../../components/UI/Button';
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '../../schemas/authSchemas';
+import { useForgotPassword } from '../../hooks/useAuth';
+import EmailSentScreen from '../../components/EmailSentScreen';
 
 // ---  Main Form Component ---
 export default function ForgotPassword() {
     const navigate = useNavigate();
     const [emailSent, setEmailSent] = useState(false);
     const [submittedEmail, setSubmittedEmail] = useState('');
+    const [countdown, setCountdown] = useState(0);
+    const { mutate: sendResetCode, isPending } = useForgotPassword();
 
     const {
         register,
         handleSubmit,
-        formState: { errors, isSubmitting },
+        formState: { errors },
     } = useForm<ForgotPasswordFormData>({
         resolver: zodResolver(forgotPasswordSchema),
     });
 
+    // Countdown timer effect
+    useEffect(() => {
+        if (countdown > 0) {
+            const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [countdown]);
+
     const onSubmit = (data: ForgotPasswordFormData) => {
-        console.log('Forgot Password Submitted:', data);
-        setSubmittedEmail(data.email);
-        // Simulate email sent
-        setTimeout(() => {
-            setEmailSent(true);
-        }, 1000);
+        sendResetCode(data, {
+            onSuccess: () => {
+                setSubmittedEmail(data.email);
+                setEmailSent(true);
+                setCountdown(60);
+            },
+        });
+    };
+
+    const handleResend = () => {
+        sendResetCode({ email: submittedEmail }, {
+            onSuccess: () => {
+                setCountdown(60);
+            },
+        });
     };
 
     if (emailSent) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-white p-4">
-                <div className="w-full max-w-md space-y-8">
-                    {/* Header */}
-                    <div className="text-center">
-                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-                            <Send className="h-8 w-8 text-green-600" />
-                        </div>
-                        <h2 className="text-2xl font-bold tracking-tight text-black">
-                            Check your email
-                        </h2>
-                        <p className="mt-2 text-sm text-neutral-600">
-                            We've sent a password reset code to
-                            <br />
-                            <span className="font-medium text-black">{submittedEmail}</span>
-                        </p>
-                    </div>
-
-                    {/* Action Container */}
-                    <div className="border border-neutral-200 p-6 rounded-sm space-y-4">
-                        <Button
-                            onClick={() => navigate('/otp', { state: { email: submittedEmail, purpose: 'reset' } })}
-                            className="w-full"
-                        >
-                            Enter Verification Code
-                        </Button>
-
-                        <div className="space-y-3">
-                            <div className="text-center text-sm text-neutral-600">
-                                Didn't receive the email?{' '}
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setEmailSent(false);
-                                        console.log('Resending to:', submittedEmail);
-                                    }}
-                                    className="font-medium text-black hover:underline"
-                                >
-                                    Resend
-                                </button>
-                            </div>
-                            <div className="text-center text-sm text-neutral-600">
-                                <Link to="/login" className="font-medium text-black hover:underline">
-                                    Back to Login
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <EmailSentScreen
+                email={submittedEmail}
+                onNavigate={() => navigate('/reset-password', { state: { email: submittedEmail } })}
+                onResend={handleResend}
+                isResending={isPending}
+                countdown={countdown}
+            />
         );
     }
 
@@ -117,8 +96,8 @@ export default function ForgotPassword() {
                         />
                     </div>
 
-                    <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting} className="w-full">
-                        {isSubmitting ? 'Sending...' : 'Send Reset Code'}
+                    <Button type="submit" disabled={isPending} isLoading={isPending} className="w-full">
+                        {isPending ? 'Sending...' : 'Send Reset Code'}
                     </Button>
 
                     <div className="text-center text-sm text-neutral-600">
