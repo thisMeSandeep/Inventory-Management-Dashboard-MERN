@@ -88,6 +88,40 @@ export const verifyEmail = async (email: string, token: number) => {
   };
 };
 
+//--------------- Resend verification email ---------------
+export const resendVerificationEmail = async (email: string) => {
+  // check if user exists
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new NotFoundError("User with this email not found");
+  }
+
+  // check if email is already verified
+  if (user.isVerified) {
+    throw new BadRequestError("Email is already verified");
+  }
+
+  const token = generateToken();
+
+  // save token and expiry in redis (overwrite old token)
+  await redis.set(`emailVerificationToken:${email}`, token, { EX: 10 * 60 });
+
+  const mailRes = await sendMail({
+    to: email,
+    subject: "Email Verification",
+    text: `Your email verification token is ${token}`,
+    html: emailVerificationTemplate(token, user.name, 10),
+  });
+
+  if (!mailRes) throw new Error("Failed to send verification email");
+
+  return {
+    success: true,
+    message: "Verification email sent successfully",
+  };
+};
+
 //--------------- forgot password ---------------
 export const passwordForgot = async (email: string) => {
   //  check if email exists

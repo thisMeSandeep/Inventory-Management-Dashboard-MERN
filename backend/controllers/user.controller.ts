@@ -6,6 +6,7 @@ import {
   passwordReset,
   registerUser,
   verifyEmail,
+  resendVerificationEmail,
 } from "@/services/user.services.js";
 import { userValidation } from "@/validations/userValidation.js";
 import { Request, Response } from "express";
@@ -76,6 +77,43 @@ export const emailVerification = async (req: Request, res: Response) => {
     return res.status(200).json(response);
   } catch (error: any) {
     console.error("Email Verification Error:", error);
+
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    }
+    // For unexpected errors
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+// ----------------------resend verification email controller -----------------------
+export const resendVerification = async (req: Request, res: Response) => {
+  const validation = z.object({
+    email: z.email({ error: "Invalid email format" }),
+  });
+  try {
+    const { email } = req.body;
+
+    const result = validation.safeParse({ email });
+
+    if (!result.success) {
+      const errMessage = result.error.issues[0].message;
+      return res.status(400).json({
+        success: false,
+        message: errMessage,
+      });
+    }
+
+    const response = await resendVerificationEmail(email);
+
+    return res.status(200).json(response);
+  } catch (error: any) {
+    console.error("Resend Verification Error:", error);
 
     if (error instanceof HttpError) {
       return res.status(error.statusCode).json({
