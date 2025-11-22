@@ -65,7 +65,7 @@ export const getProducts = (filters?: ProductFilters) => {
 
 // --------------------get single product------------------
 export const getProduct = (slug: string) => {
-  return axiosInstance.get<ProductResponse>(`/product/${slug}`);
+  return axiosInstance.get<ProductResponse>(`/product/product/${slug}`);
 };
 
 // --------------------delete product------------------

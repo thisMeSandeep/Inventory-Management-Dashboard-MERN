@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { getProducts, createProduct } from "../api/product.api";
+import { getProducts, getProduct, createProduct } from "../api/product.api";
 import type {
   ProductFilters,
   ProductsResponse,
@@ -39,7 +39,7 @@ export const useProductList = (filters?: ProductFilters) => {
   };
 };
 
-// Mutation Create Product 
+// Mutation Create Product
 export const useCreateProduct = () => {
   return useMutation<ProductResponse, Error, CreateProductFormValues>({
     mutationFn: async (values: CreateProductFormValues) => {
@@ -52,5 +52,19 @@ export const useCreateProduct = () => {
     onError: (error: Error) => {
       toast.error(error.message || "Failed to create product");
     },
+  });
+};
+
+// Fetch single product by slug
+export const useProduct = (slug: string) => {
+  return useQuery<Product, Error>({
+    queryKey: ["product", slug],
+    queryFn: async () => {
+      const response = await getProduct(slug);
+      return response.data.data;
+    },
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: false,
+    enabled: !!slug,
   });
 };
