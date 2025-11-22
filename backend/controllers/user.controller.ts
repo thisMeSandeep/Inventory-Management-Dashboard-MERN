@@ -262,7 +262,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
           return res.status(200).json({
             success: true,
             message: "User retrieved successfully",
-            data: JSON.parse(cachedUser),
+            user: JSON.parse(cachedUser),
           });
         }
 
@@ -291,7 +291,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
         return res.status(200).json({
           success: true,
           message: "User retrieved successfully",
-          data: userData,
+          user: userData,
         });
       } catch (err) {
         // Access token invalid/expired, fall through to refresh token
@@ -325,7 +325,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
         return res.status(200).json({
           success: true,
           message: "User retrieved successfully",
-          data: JSON.parse(cachedUser),
+          user: JSON.parse(cachedUser),
         });
       }
 
@@ -362,7 +362,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
       return res.status(200).json({
         success: true,
         message: "User retrieved successfully",
-        data: userData,
+        user: userData,
       });
     } catch (err: any) {
       // Handle refresh token errors
