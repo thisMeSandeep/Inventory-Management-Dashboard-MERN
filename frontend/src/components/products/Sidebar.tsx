@@ -1,13 +1,16 @@
 import { Filter, X } from "lucide-react";
 import FilteringUI from "./FilteringUI.tsx";
+import type { ProductFilters } from "../../types/product.types";
 
 interface SidebarProps {
     mobileOpen: boolean;
     onClose: () => void;
     onClear?: () => void;
+    filters: ProductFilters;
+    onFiltersChange: (partial: Partial<ProductFilters>) => void;
 }
 
-const Sidebar = ({ mobileOpen, onClose, onClear }: SidebarProps) => {
+const Sidebar = ({ mobileOpen, onClose, onClear, filters, onFiltersChange }: SidebarProps) => {
     return (
         <>
             {/* Desktop Sidebar */}
@@ -16,7 +19,7 @@ const Sidebar = ({ mobileOpen, onClose, onClear }: SidebarProps) => {
                     <Filter className="h-4 w-4" /> Filters
                 </h2>
                 <div className="space-y-6">
-                    <FilteringUI />
+                    <FilteringUI filters={filters} onFiltersChange={onFiltersChange} />
                     <button
                         onClick={onClear}
                         className="text-xs text-neutral-600 hover:text-black underline cursor-pointer"
@@ -47,7 +50,7 @@ const Sidebar = ({ mobileOpen, onClose, onClear }: SidebarProps) => {
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto space-y-6">
-                            <FilteringUI />
+                            <FilteringUI filters={filters} onFiltersChange={onFiltersChange} />
                         </div>
                         <div className="pt-4 mt-4 border-t border-neutral-200 flex gap-2">
                             <button

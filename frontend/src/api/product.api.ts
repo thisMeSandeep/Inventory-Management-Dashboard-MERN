@@ -58,7 +58,7 @@ export const updateProduct = (slug: string, data: UpdateProductInput) => {
 
 // --------------------get all products------------------
 export const getProducts = (filters?: ProductFilters) => {
-  return axiosInstance.get<ProductsResponse>("/products", {
+  return axiosInstance.get<ProductsResponse>("/product/products", {
     params: filters,
   });
 };

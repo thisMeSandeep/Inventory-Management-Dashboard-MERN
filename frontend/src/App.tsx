@@ -13,6 +13,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useCurrentUser } from './hooks/useAuth';
 import DashboardLayout from './components/DashboardLayout';
+import CreateProduct from './pages/dashboard/CreateProduct';
 
 const App = () => {
   const { isLoading, data: user } = useCurrentUser();
@@ -43,9 +44,10 @@ const App = () => {
           <Route element={<DashboardLayout />}>
             <Route path="/products" element={<Products />} />
             <Route path="/products/:slug" element={<ProductDetails />} />
+            <Route path="/create" element={<CreateProduct />} />
           </Route>
         </Route>
-
+    
 
         {/* Default redirect */}
         <Route path="/" element={user ? <Navigate to="/products" replace /> : <Navigate to="/login" replace />} />

@@ -1,38 +1,50 @@
-import { Image as ImageIcon } from "lucide-react";
+import { Link } from "react-router-dom";
+import type { Product } from "../../types/product.types";
 
 interface ProductListProps {
-  // placeholder props for future data integration
-  count?: number; // how many skeletons to show
+    products: Product[];
+    onSelect?: (product: Product) => void;
 }
 
-const ProductList: React.FC<ProductListProps> = ({ count = 12 }) => {
-  const items = Array.from({ length: count });
-
-  return (
-    <section>
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {items.map((_, idx) => (
-          <div
-            key={idx}
-            className="group relative rounded-sm border border-neutral-200 bg-white p-4 flex flex-col shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="aspect-square w-full mb-3 rounded-sm bg-neutral-100 flex items-center justify-center overflow-hidden">
-              <ImageIcon className="h-8 w-8 text-neutral-400" />
+const ProductList = ({ products, onSelect }: ProductListProps) => {
+    return (
+        <section>
+            <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {products.map((product) => (
+                    <Link
+                        key={product._id}
+                        to={`/products/${product.slug}`}
+                        onClick={() => onSelect?.(product)}
+                        className="group cursor-pointer relative rounded-sm border border-neutral-200 bg-white p-4 flex flex-col shadow-sm hover:shadow-md transition-shadow"
+                    >
+                        <div className="aspect-square w-full mb-3 rounded-sm bg-neutral-100 overflow-hidden flex items-center justify-center">
+                            {product.thumbnail ? (
+                                <img
+                                    src={product.thumbnail}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                />
+                            ) : (
+                                <div className="text-xs text-neutral-500">No Image</div>
+                            )}
+                        </div>
+                        <h3 className="text-sm font-medium text-black mb-1 line-clamp-2">{product.name}</h3>
+                        <p className="text-xs text-neutral-600 mb-2 capitalize">{product.category}</p>
+                        <div className="mt-auto flex justify-between items-end">
+                            <div className="flex flex-col">
+                                {product.discount > 0 && (
+                                    <span className="text-xs text-neutral-500 line-through">${product.price}</span>
+                                )}
+                                <span className="text-sm font-semibold text-black">${product.finalPrice}</span>
+                            </div>
+                            <span className="text-xs text-neutral-600">★ {product.rating}</span>
+                        </div>
+                    </Link>
+                ))}
             </div>
-            <div className="space-y-2">
-              <div className="h-3 w-4/5 bg-neutral-200 rounded" />
-              <div className="h-3 w-2/3 bg-neutral-200 rounded" />
-              <div className="h-3 w-1/2 bg-neutral-200 rounded" />
-            </div>
-            <div className="mt-4 flex justify-between items-center">
-              <div className="h-4 w-14 bg-neutral-200 rounded" />
-              <div className="h-4 w-10 bg-neutral-200 rounded" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
+        </section>
+    );
 };
 
 export default ProductList;
