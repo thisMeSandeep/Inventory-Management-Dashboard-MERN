@@ -12,6 +12,7 @@ import Spinner from './components/UI/Spinner';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useCurrentUser } from './hooks/useAuth';
+import DashboardLayout from './components/DashboardLayout';
 
 const App = () => {
   const { isLoading, data: user } = useCurrentUser();
@@ -39,9 +40,12 @@ const App = () => {
 
         {/* Protected Dashboard Routes */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/products" element={<Products />} />
-          <Route path="/products/:slug" element={<ProductDetails />} />
+          <Route element={<DashboardLayout />}>
+            <Route path="/products" element={<Products />} />
+            <Route path="/products/:slug" element={<ProductDetails />} />
+          </Route>
         </Route>
+
 
         {/* Default redirect */}
         <Route path="/" element={user ? <Navigate to="/products" replace /> : <Navigate to="/login" replace />} />

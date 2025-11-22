@@ -257,7 +257,7 @@ export const login = async (email: string, password: string, res: Response) => {
 
   return {
     success: true,
-    message: "User logged in successfully",
+    message: "Logged in successfully",
     user: userData,
   };
 };
