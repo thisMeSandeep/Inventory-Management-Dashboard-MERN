@@ -26,7 +26,7 @@ export const createProduct = (data: CreateProductInput) => {
   }
   formData.append("thumbnail", data.thumbnail);
   data.images.forEach((file) => formData.append("images", file));
-  return axiosInstance.post<ProductResponse>("/product", formData, {
+  return axiosInstance.post<ProductResponse>("/product/product", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 };
@@ -51,7 +51,7 @@ export const updateProduct = (slug: string, data: UpdateProductInput) => {
   if (data.images && data.images.length) {
     data.images.forEach((file) => formData.append("images", file));
   }
-  return axiosInstance.put<ProductResponse>(`/product/${slug}`, formData, {
+  return axiosInstance.put<ProductResponse>(`/product/product/${slug}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 };
@@ -70,5 +70,5 @@ export const getProduct = (slug: string) => {
 
 // --------------------delete product------------------
 export const deleteProduct = (slug: string) => {
-  return axiosInstance.delete<ProductResponse>(`/product/${slug}`);
+  return axiosInstance.delete<ProductResponse>(`/product/product/${slug}`);
 };

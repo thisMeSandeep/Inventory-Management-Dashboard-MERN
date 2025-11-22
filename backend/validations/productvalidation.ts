@@ -22,9 +22,8 @@ const productBaseSchema = z.object({
   description: z
     .string()
     .trim()
-    .max(1000, "Description must be at most 1000 characters")
-    .optional()
-    .or(z.literal("").transform(() => undefined)),
+    .min(1, "Description is required")
+    .max(1000, "Description must be at most 1000 characters"),
   soldBy: z.string().trim().min(1, "Seller information is required"),
   brand: z
     .string()
@@ -59,15 +58,13 @@ const productBaseSchema = z.object({
     }
     return val;
   }, z.number().int().min(0, "Stock cannot be negative").optional().default(0)),
-  tags: z
-    .preprocess((val) => {
-      if (!val || val === "") return undefined;
+  tags: z.preprocess((val) => {
       if (typeof val === "string") {
         try {
           const parsed = JSON.parse(val);
-          return Array.isArray(parsed) ? parsed : undefined;
+          return parsed;
         } catch {
-          return undefined;
+          return val; // will fail downstream if not array
         }
       }
       return val;
@@ -75,9 +72,8 @@ const productBaseSchema = z.object({
       .array(
         z.string().trim().min(1, "Tag cannot be empty").max(30, "Tag must be at most 30 characters")
       )
-      .max(10, "No more than 10 tags are allowed")
-      .optional())
-    .optional(),
+      .min(1, "At least one tag is required")
+      .max(10, "No more than 10 tags are allowed")),
 });
 
 export const createProductSchema = productBaseSchema;

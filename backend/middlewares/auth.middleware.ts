@@ -10,9 +10,42 @@ const authMiddleware = async (
 ) => {
   try {
     const accessToken = req.cookies.accessToken;
+    const refreshToken = req.cookies.refreshToken;
     
+    // If no access token, try to use refresh token
     if (!accessToken) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
+      if (!refreshToken) {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+      }
+      
+      // Try to generate new access token from refresh token
+      try {
+        const decoded = jwt.verify(
+          refreshToken,
+          process.env.JWT_SECRET_KEY!
+        ) as JwtPayload;
+        
+        const { id, role } = decoded;
+        
+        const newAccessToken = generateJwtToken(
+          id,
+          role,
+          process.env.ACCESS_TOKEN_EXPIRY!
+        );
+        
+        res.cookie("accessToken", newAccessToken, getCookieOptions(15 * 60 * 1000));
+        
+        req.user = { id, role };
+        return next();
+        
+      } catch (refreshError: any) {
+        return res.status(401).json({
+          success: false,
+          message: refreshError.name === "TokenExpiredError"
+            ? "Refresh token expired" 
+            : "Invalid refresh token",
+        });
+      }
     }
     
     try {
