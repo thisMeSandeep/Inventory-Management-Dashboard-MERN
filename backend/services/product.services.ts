@@ -2,7 +2,7 @@ import { uploadToCloudinary } from "@/config/cloudinary.js";
 import { BadRequestError, NotFoundError } from "@/errors/httpError.js";
 import Product from "@/models/product.model.js";
 import User from "@/models/user.model.js";
-import { CreateProductInput } from "@/validations/productValidation.js";
+import { CreateProductInput } from "../validations/productValidation.js";
 import { Request } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import { io } from "@/server.js";

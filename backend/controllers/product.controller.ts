@@ -1,18 +1,17 @@
-import { HttpError } from "@/errors/httpError.js";
+import { HttpError } from "../errors/httpError.js";
 import {
   createProductService,
   deleteProductService,
   getAllProductsService,
   getProductService,
   updateProductService,
-} from "@/services/product.services.js";
+} from "../services/product.services.js";
 import {
   createProductSchema,
   updateProductSchema,
-} from "@/validations/productValidation.js";
+} from "../validations/productValidation.js";
 import { Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
-
 
 // -------------------- Create a Product---------------------
 export const createProduct = async (req: Request, res: Response) => {
