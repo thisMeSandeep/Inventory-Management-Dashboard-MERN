@@ -33,10 +33,8 @@ httpServer.listen(PORT, async () => {
   try {
     await connectDb();
     await connectRedis();
-    // Verify email connection 
-    verifyEmailConnection().catch(() => {
-      console.warn("Email service verification failed - emails may not work");
-    });
+    // Initialize and verify email connection 
+    await verifyEmailConnection();
     console.log(`Server is running on port ${PORT}`);
     console.log(`Socket.IO is ready`);
   } catch (err) {

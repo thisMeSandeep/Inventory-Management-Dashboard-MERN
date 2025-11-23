@@ -4,6 +4,7 @@ import Button from './UI/Button';
 
 interface EmailSentScreenProps {
   email: string;
+  emailPreviewUrl?: string | null;
   onNavigate: () => void;
   onResend: () => void;
   isResending: boolean;
@@ -12,6 +13,7 @@ interface EmailSentScreenProps {
 
 export default function EmailSentScreen({
   email,
+  emailPreviewUrl,
   onNavigate,
   onResend,
   isResending,
@@ -35,6 +37,21 @@ export default function EmailSentScreen({
             <br />
             <span className="font-medium text-black">{email}</span>
           </p>
+          {emailPreviewUrl && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-sm text-blue-800 mb-2">
+                Click the link below to view your email:
+              </p>
+              <a
+                href={emailPreviewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-blue-600 hover:text-blue-800 underline break-all"
+              >
+                {emailPreviewUrl}
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Action Container */}

@@ -5,10 +5,9 @@ declare namespace NodeJS {
     PROD_CLIENT_URL: string;
     NODE_ENV?: "development" | "production" | "test";
     MONGODB_URI: string;
-    JWT_SECRET_KEY?: string;
-    EMAIL_USER: string;
-    SMTP_PASSWORD: string;
     JWT_SECRET_KEY: string;
+    EMAIL_USER?: string; // Optional - used for "from" field, has fallback
+    SMTP_PASSWORD?: string; // No longer needed with Ethereal
     ACCESS_TOKEN_EXPIRY: string;
     REFRESH_TOKEN_EXPIRY: string;
     CLOUDINARY_API_KEY: string;

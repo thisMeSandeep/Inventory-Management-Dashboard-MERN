@@ -29,9 +29,12 @@ export default function RegisterForm() {
     registerMutate(data, {
       onSuccess: (response) => {
         reset();
-        // Navigate to email verification with the registered email
+        // Navigate to email verification with the registered email and preview URL
         navigate('/verify-email', {
-          state: { email: response.data.user.email }
+          state: { 
+            email: response.data.user.email,
+            emailPreviewUrl: response.data.user.emailPreviewUrl 
+          }
         });
       },
     });

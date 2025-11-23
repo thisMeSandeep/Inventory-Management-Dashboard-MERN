@@ -46,7 +46,10 @@ export const registerUser = async (
 
   if (!mailRes) throw new Error("Failed to send verification email");
 
-  return { email: user.email };
+  return { 
+    email: user.email,
+    emailPreviewUrl: mailRes.previewUrl, // Ethereal preview URL
+  };
 };
 
 //-------------------- Verify email ---------------
@@ -119,6 +122,7 @@ export const resendVerificationEmail = async (email: string) => {
   return {
     success: true,
     message: "Verification email sent successfully",
+    emailPreviewUrl: mailRes.previewUrl, // Ethereal preview URL
   };
 };
 
@@ -155,6 +159,7 @@ export const passwordForgot = async (email: string) => {
   return {
     success: true,
     message: "Password reset token sent successfully",
+    emailPreviewUrl: mailRes.previewUrl, // Ethereal preview URL
   };
 };
 
