@@ -1,6 +1,13 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createProductSchema, updateProductSchema, type CreateProductFormValues, audienceEnum, categoryEnum } from "../../schemas/productSchemas";
+import {
+    createProductSchema,
+    updateProductSchema,
+    type CreateProductFormValues,
+    type UpdateProductFormValues,
+    audienceEnum,
+    categoryEnum
+} from "../../schemas/productSchemas";
 import Input from "../../components/UI/Input";
 import Button from "../../components/UI/Button";
 import { useState, useEffect } from "react";
@@ -13,16 +20,18 @@ const CreateProduct = () => {
     const navigate = useNavigate();
     const { slug } = useParams<{ slug: string }>();
     const isEditMode = !!slug;
-    
+
     const { mutateAsync: createMutate, isPending: isCreating } = useCreateProduct();
     const { mutateAsync: updateMutate, isPending: isUpdating } = useUpdateProduct();
     const { data: existingProduct, isLoading: isLoadingProduct } = useProduct(slug || "");
-    
+
     const [tagValue, setTagValue] = useState("");
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
     const [imagesPreview, setImagesPreview] = useState<string[]>([]);
-    const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
+    type ProductForm = CreateProductFormValues | UpdateProductFormValues;
+
+    // Use different schema and type based on mode
     const {
         register,
         handleSubmit,
@@ -44,7 +53,6 @@ const CreateProduct = () => {
     // Prepopulate form when in edit mode
     useEffect(() => {
         if (isEditMode && existingProduct) {
-            // Set text fields
             reset({
                 name: existingProduct.name,
                 description: existingProduct.description || "",
@@ -56,16 +64,14 @@ const CreateProduct = () => {
                 price: existingProduct.price,
                 discount: existingProduct.discount || 0,
                 stock: existingProduct.stock || 0,
-                thumbnail: null as unknown as File,
-                images: [],
             });
-            
-            // Set image previews from existing URLs
             setThumbnailPreview(existingProduct.thumbnail);
             setImagesPreview(existingProduct.images);
         }
     }, [isEditMode, existingProduct, reset]);
 
+
+    // add and remove tags
     function addTag() {
         const v = tagValue.trim();
         if (!v) return;
@@ -81,6 +87,7 @@ const CreateProduct = () => {
         setValue("tags", tags.filter((t) => t !== tag));
     }
 
+    // handle thumbnail and images change
     function handleThumbnailChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (file) {
@@ -90,43 +97,40 @@ const CreateProduct = () => {
     }
 
     function removeThumbnail() {
-        setValue("thumbnail", null as unknown as File);
+        setValue("thumbnail", undefined);
         setThumbnailPreview(null);
     }
 
+    // handle multiple images change
     function handleImagesChange(e: React.ChangeEvent<HTMLInputElement>) {
         const files = Array.from(e.target.files || []);
         if (files.length) {
-            setSelectedImages(files);
             setValue("images", files, { shouldValidate: true });
             setImagesPreview(files.map((f) => URL.createObjectURL(f)));
         }
     }
 
     function removeImage(index: number) {
-        const updatedImages = selectedImages.filter((_, i) => i !== index);
-        setSelectedImages(updatedImages);
-        setValue("images", updatedImages, { shouldValidate: true });
-        setImagesPreview(updatedImages.map((f) => URL.createObjectURL(f)));
+        const current = watch("images") || [];
+        const updated = current.filter((_, i) => i !== index);
+        setValue("images", updated, { shouldValidate: true });
+        setImagesPreview(updated.map((f) => URL.createObjectURL(f)));
     }
 
-
-    // handle form submit 
-    async function onSubmit(values: CreateProductFormValues) {
+    // unified submit handler
+    async function onSubmit(values: ProductForm) {
         try {
-            if (isEditMode && slug) {
-                // Update existing product
-                const res = await updateMutate({ slug, data: values });
-                navigate(`/products/${res.data.slug}`);
-            } else {
-                // Create new product
-                const res = await createMutate(values);
-                toast.success("Product created successfully");
-                navigate(`/products/${res.data.slug}`);
+            if (isEditMode) {
+                if (!slug) return;
+                await updateMutate({ slug, data: values as UpdateProductFormValues });
+                navigate(`/products/${slug}`);
+                return;
             }
+            const res = await createMutate(values as CreateProductFormValues);
+            toast.success("Product created successfully");
+            navigate(`/products/${res.data.slug}`);
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : `Failed to ${isEditMode ? 'update' : 'create'} product`;
-            toast.error(errorMessage);
+            toast.error(err instanceof Error ? err.message : "Submit failed");
         }
     }
 
@@ -149,7 +153,10 @@ const CreateProduct = () => {
             <h1 className="text-xl font-semibold text-black mb-6">
                 {isEditMode ? 'Edit Product' : 'Create Product'}
             </h1>
-            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+            >
 
                 {/* Left: Basic Details */}
                 <div className="lg:col-span-2 space-y-6">
@@ -268,7 +275,7 @@ const CreateProduct = () => {
 
                 {/* Right: Media Section */}
                 <div className="space-y-6">
-                    {/* Thumbnail Image - Required, single file, <=5MB, jpeg/jpg/png/webp */}
+                    {/* Thumbnail Image - Required in create, optional in edit */}
                     <div>
                         <label className="block text-sm font-medium text-black mb-1.5">
                             Thumbnail {!isEditMode && '*'}
@@ -279,7 +286,7 @@ const CreateProduct = () => {
                             onChange={handleThumbnailChange}
                             className="w-full text-sm rounded-sm border border-neutral-300 px-3 py-2 file:mr-3 file:py-1.5 file:px-3 file:border-0 file:rounded-sm file:bg-neutral-200 file:text-sm file:font-medium"
                         />
-                        {!isEditMode && errors.thumbnail && <p className="mt-1.5 text-xs font-medium text-red-600">{errors.thumbnail.message}</p>}
+                        {!isEditMode && errors.thumbnail && <p className="mt-1.5 text-xs font-medium text-red-600">{errors.thumbnail?.message}</p>}
                         {isEditMode && <p className="mt-1.5 text-xs text-neutral-500">Leave empty to keep current thumbnail</p>}
                         {/* Thumbnail Preview - Shows selected image */}
                         {thumbnailPreview && (
@@ -296,7 +303,7 @@ const CreateProduct = () => {
                         )}
                     </div>
 
-                    {/* Product Images - Required, min 1 max 4 files, <=5MB each, jpeg/jpg/png/webp */}
+                    {/* Product Images - Required in create (min 1), optional in edit (max 4) */}
                     <div>
                         <label className="block text-sm font-medium text-black mb-1.5">
                             Images (min 1, max 4) {!isEditMode && '*'}
@@ -308,7 +315,7 @@ const CreateProduct = () => {
                             onChange={handleImagesChange}
                             className="w-full text-sm rounded-sm border border-neutral-300 px-3 py-2 file:mr-3 file:py-1.5 file:px-3 file:border-0 file:rounded-sm file:bg-neutral-200 file:text-sm file:font-medium"
                         />
-                        {!isEditMode && errors.images && <p className="mt-1.5 text-xs font-medium text-red-600">{errors.images.message}</p>}
+                        {!isEditMode && errors.images && <p className="mt-1.5 text-xs font-medium text-red-600">{errors.images?.message}</p>}
                         {isEditMode && <p className="mt-1.5 text-xs text-neutral-500">Leave empty to keep current images</p>}
                         {/* Images Preview Grid - Shows selected images */}
                         {imagesPreview.length > 0 && (

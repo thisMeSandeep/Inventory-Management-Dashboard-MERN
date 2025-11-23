@@ -14,7 +14,7 @@ import type {
   CreateProductInput,
   UpdateProductInput,
 } from "../types/product.types";
-import type { CreateProductFormValues } from "../schemas/productSchemas";
+import type { CreateProductFormValues, UpdateProductFormValues } from "../schemas/productSchemas";
 import { queryClient } from "../lib/queryClient";
 import { toast } from "react-toastify";
 
@@ -78,7 +78,7 @@ export const useUpdateProduct = () => {
   return useMutation<
     ProductResponse,
     Error,
-    { slug: string; data: CreateProductFormValues }
+    { slug: string; data: UpdateProductFormValues }
   >({
     mutationFn: async ({ slug, data }) => {
       const res = await updateProduct(slug, data as unknown as UpdateProductInput);

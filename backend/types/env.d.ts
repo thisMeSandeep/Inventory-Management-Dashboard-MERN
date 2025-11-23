@@ -5,7 +5,7 @@ declare namespace NodeJS {
     PROD_CLIENT_URL: string;
     NODE_ENV?: "development" | "production" | "test";
     MONGODB_URI: string;
-    // JWT_SECRET?: string;
+    JWT_SECRET_KEY?: string;
     EMAIL_USER: string;
     SMTP_PASSWORD: string;
     JWT_SECRET_KEY: string;
