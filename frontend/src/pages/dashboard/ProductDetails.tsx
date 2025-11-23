@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, AlertCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, Trash2, Edit } from 'lucide-react';
 import { useProduct, useDeleteProduct } from '../../hooks/useProduct';
 import ProductImageGallery from '../../components/products/ProductImageGallery';
 import ProductInfo from '../../components/products/ProductInfo';
@@ -107,17 +107,24 @@ const ProductDetails = () => {
       <div className="mt-10 border-t border-neutral-200 pt-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-neutral-900">Danger Zone</h3>
-            <p className="text-sm text-neutral-600">Delete this product permanently.</p>
+            <h3 className="text-lg font-semibold text-neutral-900">Actions</h3>
+            <p className="text-sm text-neutral-600">Edit or delete this product.</p>
           </div>
-          <Button
-            variant="outline"
-            className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-600"
-            onClick={handleDelete}
-            isLoading={deleteMutation.isPending}
-          >
-            <Trash2 className="w-4 h-4 mr-2" /> Delete Product
-          </Button>
+          <div className="flex gap-3">
+            <Link to={`/products/${product.slug}/edit`}>
+              <Button variant="outline">
+                <Edit className="w-4 h-4 mr-2" /> Edit Product
+              </Button>
+            </Link>
+            <Button
+              variant="outline"
+              className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-600"
+              onClick={handleDelete}
+              isLoading={deleteMutation.isPending}
+            >
+              <Trash2 className="w-4 h-4 mr-2" /> Delete Product
+            </Button>
+          </div>
         </div>
       </div>
     </div>

@@ -160,11 +160,6 @@ export const updateProductService = async (
   const product = await Product.findOne({ slug });
   if (!product) throw new NotFoundError("Product not found");
 
-  // check if user is the owner of the product
-  if (product.userId.toString() !== userId) {
-    throw new BadRequestError("You are not authorized to update this product");
-  }
-
   // Prepare update data with only validated text fields
   const updateData: any = { ...validatedData };
 
@@ -197,30 +192,23 @@ export const updateProductService = async (
   }
 
   // update product
-  const updatedProduct = await Product.findOneAndUpdate(
-    { slug },
-    updateData,
-    { new: true, runValidators: true }
-  );
+  const updatedProduct = await Product.findOneAndUpdate({ slug }, updateData, {
+    new: true,
+    runValidators: true,
+  });
 
   return updatedProduct;
 };
 
 // --------------- Delete a product-----------------
-export const deleteProductService = async (
-  userId: string,
-  slug: string
-) => {
+export const deleteProductService = async (userId: string, slug: string) => {
   // check if user exists
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("User not found");
   // check if product exists
   const product = await Product.findOne({ slug });
   if (!product) throw new NotFoundError("Product not found");
-  // check if user is the owner of the product
-  if (product.userId.toString() !== userId) {
-    throw new BadRequestError("You are not authorized to delete this product");
-  }
+
   // delete product
   const deletedProduct = await Product.findOneAndDelete({ slug });
 

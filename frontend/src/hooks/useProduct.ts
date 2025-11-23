@@ -3,6 +3,7 @@ import {
   getProducts,
   getProduct,
   createProduct,
+  updateProduct,
   deleteProduct,
 } from "../api/product.api";
 import type {
@@ -11,6 +12,7 @@ import type {
   Product,
   ProductResponse,
   CreateProductInput,
+  UpdateProductInput,
 } from "../types/product.types";
 import type { CreateProductFormValues } from "../schemas/productSchemas";
 import { queryClient } from "../lib/queryClient";
@@ -54,9 +56,6 @@ export const useCreateProduct = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to create product");
-    },
   });
 };
 
@@ -71,6 +70,24 @@ export const useProduct = (slug: string) => {
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
     enabled: !!slug,
+  });
+};
+
+// Update product by slug
+export const useUpdateProduct = () => {
+  return useMutation<
+    ProductResponse,
+    Error,
+    { slug: string; data: CreateProductFormValues }
+  >({
+    mutationFn: async ({ slug, data }) => {
+      const res = await updateProduct(slug, data as unknown as UpdateProductInput);
+      return res.data;
+    },
+    onSuccess: (_, { slug }) => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["product", slug] });
+    },
   });
 };
 
