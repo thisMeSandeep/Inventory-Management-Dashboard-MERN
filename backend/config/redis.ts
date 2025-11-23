@@ -1,7 +1,7 @@
 import { createClient } from "redis";
 
 const redis: ReturnType<typeof createClient> = createClient({
-  url: process.env.REDIS_URL,
+  url: process.env.UPSTASH_REDIS_REST_URL!,
   socket: {
     reconnectStrategy: (retries) => {
       if (retries > 10) {
