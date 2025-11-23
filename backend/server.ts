@@ -33,7 +33,7 @@ httpServer.listen(PORT, async () => {
   try {
     await connectDb();
     await connectRedis();
-    // Verify email connection (non-blocking - server will start even if email fails)
+    // Verify email connection 
     verifyEmailConnection().catch(() => {
       console.warn("Email service verification failed - emails may not work");
     });

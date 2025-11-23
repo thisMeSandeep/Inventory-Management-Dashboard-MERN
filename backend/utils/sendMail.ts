@@ -31,17 +31,22 @@ export const sendMail = async ({ to, subject, text, html }: Email) => {
     const info = await withTimeout(transporter.sendMail(mailOptions), 15000);
     return info;
   } catch (err: any) {
-    console.error("❌ Error sending email:", err);
+    console.error("Error sending email:", err);
+    console.error("Error code:", err.code);
+    console.error("Error command:", err.command);
     
     // Provide more specific error messages
-    if (err.message?.includes("timeout")) {
-      throw new Error("Email service timeout - please try again later");
+    if (err.code === "ETIMEDOUT" || err.message?.includes("timeout") || err.message?.includes("Connection timeout")) {
+      throw new Error("Email service timeout - unable to connect to SMTP server. This may be due to network restrictions in your hosting environment.");
     }
     if (err.code === "EAUTH") {
       throw new Error("Email authentication failed - check credentials");
     }
-    if (err.code === "ECONNECTION") {
-      throw new Error("Failed to connect to email service");
+    if (err.code === "ECONNECTION" || err.code === "ESOCKET") {
+      throw new Error("Failed to connect to email service - check network connectivity and firewall settings");
+    }
+    if (err.code === "EENVELOPE") {
+      throw new Error("Email address validation failed");
     }
     
     throw err;
