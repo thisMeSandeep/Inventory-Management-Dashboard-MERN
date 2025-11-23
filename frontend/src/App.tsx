@@ -14,6 +14,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useCurrentUser } from './hooks/useAuth';
 import DashboardLayout from './components/DashboardLayout';
 import CreateProduct from './pages/dashboard/CreateProduct';
+import { SocketProvider } from './contexts/SocketContext';
 
 const App = () => {
   const { isLoading, data: user } = useCurrentUser();
@@ -28,7 +29,7 @@ const App = () => {
   }
 
   return (
-    <>
+    <SocketProvider>
       <Routes>
         {/* Public Routes */}
         <Route element={<PublicRoute />}>
@@ -68,7 +69,7 @@ const App = () => {
         pauseOnHover
         theme="light"
       />
-    </>
+    </SocketProvider>
   );
 };
 

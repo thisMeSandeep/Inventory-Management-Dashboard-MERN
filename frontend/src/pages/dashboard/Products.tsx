@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { ProductFilters } from "../../types/product.types";
 import { useProductList } from "../../hooks/useProduct";
@@ -7,10 +7,14 @@ import ProductList from "../../components/products/ProductList.tsx";
 import ProductSkeleton from "../../components/products/ProductSkeleton.tsx";
 import Pagination from "../../components/products/Pagination.tsx";
 import Sidebar from "../../components/products/Sidebar.tsx";
+import { useSocketContext } from "../../contexts/SocketContext";
+import { toast } from "react-toastify";
+import { queryClient } from "../../lib/queryClient.ts";
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { socket } = useSocketContext();
 
   // Parse filters from URL params
   const filters = useMemo<ProductFilters>(() => {
@@ -53,7 +57,38 @@ const Products = () => {
   }
 
   // Fetch products with current filters
-  const { products, pagination, isLoading, error } = useProductList(filters);
+  const { products, pagination, isLoading, error, refetch } = useProductList(filters);
+
+  // Listen for real-time product events
+  useEffect(() => {
+
+    // reftech data if any product is created or deleted
+    const refresh = () => {
+      if (refetch) {
+        refetch();
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["products", filters] });
+      }
+    };
+
+    const handleProductCreate = (message: string) => {
+      toast.success(message);
+      refresh();
+    };
+
+    const handleProductDelete = (message: string) => {
+      toast.info(message);
+      refresh();
+    };
+
+    socket.on("product:create", handleProductCreate);
+    socket.on("product:delete", handleProductDelete);
+
+    return () => {
+      socket.off("product:create", handleProductCreate);
+      socket.off("product:delete", handleProductDelete);
+    };
+  }, [socket, filters, refetch]);
 
   return (
     <div className="flex gap-6 items-start relative">
