@@ -68,7 +68,7 @@ export const getProduct = (slug: string) => {
   return axiosInstance.get<ProductResponse>(`/product/product/${slug}`);
 };
 
-// --------------------delete product------------------
+// --------------------delete product (by slug)------------------
 export const deleteProduct = (slug: string) => {
   return axiosInstance.delete<ProductResponse>(`/product/product/${slug}`);
 };

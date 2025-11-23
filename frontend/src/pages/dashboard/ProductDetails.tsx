@@ -1,13 +1,28 @@
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
-import { useProduct } from '../../hooks/useProduct';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Loader2, AlertCircle, Trash2 } from 'lucide-react';
+import { useProduct, useDeleteProduct } from '../../hooks/useProduct';
 import ProductImageGallery from '../../components/products/ProductImageGallery';
 import ProductInfo from '../../components/products/ProductInfo';
 import Button from '../../components/UI/Button';
 
 const ProductDetails = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const { data: product, isLoading, error } = useProduct(slug || '');
+  const deleteMutation = useDeleteProduct();
+
+  const handleDelete = () => {
+    if (!product) return;
+    const ok = window.confirm(
+      'Are you sure you want to delete this product? This action cannot be undone.'
+    );
+    if (!ok) return;
+    deleteMutation.mutate(product.slug, {
+      onSuccess: () => {
+        navigate('/products');
+      },
+    });
+  };
 
   if (isLoading) {
     return (
@@ -85,6 +100,24 @@ const ProductDetails = () => {
         {/* Right Column - Product Info */}
         <div>
           <ProductInfo product={product} />
+        </div>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="mt-10 border-t border-neutral-200 pt-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-neutral-900">Danger Zone</h3>
+            <p className="text-sm text-neutral-600">Delete this product permanently.</p>
+          </div>
+          <Button
+            variant="outline"
+            className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-600"
+            onClick={handleDelete}
+            isLoading={deleteMutation.isPending}
+          >
+            <Trash2 className="w-4 h-4 mr-2" /> Delete Product
+          </Button>
         </div>
       </div>
     </div>

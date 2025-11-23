@@ -1,5 +1,10 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { getProducts, getProduct, createProduct } from "../api/product.api";
+import {
+  getProducts,
+  getProduct,
+  createProduct,
+  deleteProduct,
+} from "../api/product.api";
 import type {
   ProductFilters,
   ProductsResponse,
@@ -66,5 +71,30 @@ export const useProduct = (slug: string) => {
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
     enabled: !!slug,
+  });
+};
+
+// Delete product by slug
+export const useDeleteProduct = () => {
+  return useMutation<ProductResponse, Error, string>({
+    mutationFn: async (slug: string) => {
+      const res = await deleteProduct(slug);
+      return res.data;
+    },
+    onSuccess: (data, slug) => {
+      toast.success(data.message || "Product deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      // Invalidate this product detail cache specifically
+      queryClient.invalidateQueries({ queryKey: ["product", slug] });
+    },
+    onError: (
+      error: Error & { response?: { data?: { message?: string } } }
+    ) => {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to delete product";
+      toast.error(message);
+    },
   });
 };
