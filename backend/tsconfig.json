@@ -12,6 +12,7 @@
     "sourceMap": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
     },
@@ -20,7 +21,8 @@
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["**/*.ts", "**/*.js", "**/*.d.ts"],
   "exclude": [
