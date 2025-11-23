@@ -9,6 +9,7 @@ import productRouter from "./routes/product.routes.js";
 const app: Express = express();
 
 // middlewares
+app.set("trust proxy", 1); // Required on Render free tier BEFORE using rateLimiter
 app.use(
   cors({
     origin: [process.env.CLIENT_URL!, process.env.PROD_CLIENT_URL!].filter(Boolean),
