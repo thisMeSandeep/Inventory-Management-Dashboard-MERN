@@ -79,13 +79,7 @@ productSchema.pre("validate", function (next) {
 
 productSchema.pre("findOneAndUpdate", async function (next) {
   const update = this.getUpdate() as Record<string, any>;
-
-  if (update.name) {
-    const cleanSlug = slugify(update.name, { lowercase: true });
-    const uniqueId = nanoid(6);
-    update.slug = `${cleanSlug}-${uniqueId}`;
-  }
-
+  // Only update finalPrice when price or discount changes
   if (update.price || update.discount) {
     const price = update.price ?? this.get("price");
     const discount = update.discount ?? this.get("discount");

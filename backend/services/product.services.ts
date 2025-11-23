@@ -163,6 +163,10 @@ export const updateProductService = async (
   // Prepare update data with only validated text fields
   const updateData: any = { ...validatedData };
 
+  // Explicitly delete slug to prevent it from being updated
+  // This allows name to be updated while keeping slug immutable
+  delete updateData.slug;
+
   // Handle files separately
   if (req.files && !Array.isArray(req.files)) {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
@@ -172,7 +176,7 @@ export const updateProductService = async (
       const thumbnail = files["thumbnail"][0].buffer;
       const thumbnailUrl = await uploadToCloudinary(
         thumbnail,
-        `products/${product.name}/thumbnail`
+        `products/${validatedData.name || product.name}/thumbnail`
       );
       updateData.thumbnail = thumbnailUrl;
     }
@@ -184,18 +188,22 @@ export const updateProductService = async (
       );
       const imagesUrls = await Promise.all(
         images.map((image: Buffer) =>
-          uploadToCloudinary(image, `products/${product.name}/images`)
+          uploadToCloudinary(image, `products/${validatedData.name || product.name}/images`)
         )
       );
       updateData.images = imagesUrls;
     }
   }
 
-  // update product
+  // update product - findOneAndUpdate bypasses pre-save hooks
   const updatedProduct = await Product.findOneAndUpdate({ slug }, updateData, {
     new: true,
     runValidators: true,
   });
+
+  if (!updatedProduct) throw new NotFoundError("Product not found");
+
+  io.emit("product:update", `${user.name} updated a product`);
 
   return updatedProduct;
 };
