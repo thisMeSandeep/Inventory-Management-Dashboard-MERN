@@ -21,8 +21,7 @@
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "ignoreDeprecations": "6.0"
+    "experimentalDecorators": true
   },
   "include": ["**/*.ts", "**/*.js", "**/*.d.ts"],
   "exclude": [
