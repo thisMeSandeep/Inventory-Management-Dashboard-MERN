@@ -1,26 +1,32 @@
-import { transporter } from "@/config/nodemailer.js";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 type Email = {
-    to: string;
-    subject: string;
-    text: string;
-    html: string;
+  to: string;
+  subject: string;
+  text: string;
+  html: string;
 };
 
 export const sendMail = async ({ to, subject, text, html }: Email) => {
-  const mailOptions = {
-    from: `"Product management" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    text,
-    html,
-  };
-
   try {
-    const info = await transporter.sendMail(mailOptions);
-    return info;
+    const data = await resend.emails.send({
+      from: "onboarding@resend.dev",
+      to,
+      subject,
+      text,
+      html,
+    });
+
+    if (data.error) {
+      console.error("Resend API Error:", data.error);
+      throw new Error(data.error.message);
+    }
+
+    return data;
   } catch (err) {
-    console.error("❌ Error sending email:", err);
+    console.error("Error sending email:", err);
     throw err;
   }
 };

@@ -19,7 +19,6 @@
     "@types/morgan": "^1.9.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.10.0",
-    "@types/nodemailer": "^7.0.3",
     "tsc-alias": "^1.8.10",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
@@ -42,8 +41,8 @@
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "nanoid": "^5.1.6",
-    "nodemailer": "^7.0.10",
     "redis": "^5.9.0",
+    "resend": "^6.5.2",
     "socket.io": "^4.8.1",
     "winston": "^3.18.3",
     "zod": "^4.1.12"
