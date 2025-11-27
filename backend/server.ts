@@ -36,9 +36,6 @@ httpServer.listen(PORT, async () => {
     await connectRedis();
     console.log(`Server is running on port ${PORT}`);
     console.log(`Socket.IO is ready`);
-    console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
-    console.log(`CLIENT_URL: ${process.env.CLIENT_URL}`);
-    console.log(`PROD_CLIENT_URL: ${process.env.PROD_CLIENT_URL}`);
   } catch (err) {
     console.error("Database connection failed:", err);
   }
