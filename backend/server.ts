@@ -4,7 +4,6 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { connectRedis } from "./config/redis.js";
 
-
 const PORT = process.env.PORT || 5000;
 
 // create HTTP server from express app
@@ -13,7 +12,9 @@ const httpServer = createServer(app);
 // Initialize Socket.IO with CORS config
 const io = new Server(httpServer, {
   cors: {
-    origin: [process.env.CLIENT_URL!, process.env.PROD_CLIENT_URL!].filter(Boolean),
+    origin: [process.env.CLIENT_URL!, process.env.PROD_CLIENT_URL!].filter(
+      Boolean
+    ),
     credentials: true,
     methods: ["GET", "POST"],
   },
@@ -33,9 +34,11 @@ httpServer.listen(PORT, async () => {
   try {
     await connectDb();
     await connectRedis();
-    // Initialize and verify email connection 
     console.log(`Server is running on port ${PORT}`);
     console.log(`Socket.IO is ready`);
+    console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+    console.log(`CLIENT_URL: ${process.env.CLIENT_URL}`);
+    console.log(`PROD_CLIENT_URL: ${process.env.PROD_CLIENT_URL}`);
   } catch (err) {
     console.error("Database connection failed:", err);
   }

@@ -1,4 +1,4 @@
-import { rateLimit } from "express-rate-limit";
+import { rateLimit, ipKeyGenerator } from "express-rate-limit";
 
 export const authLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
@@ -13,7 +13,7 @@ export const authLimiter = rateLimit({
       return `auth:${req.body.email.toLowerCase().trim()}`;
     }
     // Fallback to IP for routes without email in body
-    return `auth:${req.ip}`;
+    return `auth:${ipKeyGenerator(req.ip || "127.0.0.1")}`;
   },
 
   message: {

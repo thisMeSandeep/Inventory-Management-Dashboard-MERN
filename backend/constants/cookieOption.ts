@@ -1,7 +1,10 @@
-export const getCookieOptions = (maxAge: number) => ({
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? ("none" as const) : ("lax" as const),
-  maxAge,
-});
-
+export const getCookieOptions = (maxAge: number) => {
+  const isProduction =
+    process.env.NODE_ENV?.trim().toLowerCase() === "production";
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? ("none" as const) : ("lax" as const),
+    maxAge,
+  };
+};
