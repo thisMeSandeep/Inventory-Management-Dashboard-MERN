@@ -7,14 +7,13 @@ export const authLimiter = rateLimit({
   legacyHeaders: false,
 
   // Render free tier requires trust proxy + custom key
-  keyGenerator: (req) => {
+  keyGenerator: (req, res) => {
     // Rate-limit by email if provided, otherwise fallback to IP
-    // This ensures each user/email gets their own rate limit, not shared by IP
     if (req.body?.email && typeof req.body.email === "string") {
       return `auth:${req.body.email.toLowerCase().trim()}`;
     }
     // Fallback to IP for routes without email in body
-    return `auth:${req.ip || req.socket.remoteAddress || "unknown"}`;
+    return `auth:${req.ip}`;
   },
 
   message: {
