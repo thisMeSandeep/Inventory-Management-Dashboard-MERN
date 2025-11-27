@@ -14,7 +14,10 @@ import type {
   CreateProductInput,
   UpdateProductInput,
 } from "../types/product.types";
-import type { CreateProductFormValues, UpdateProductFormValues } from "../schemas/productSchemas";
+import type {
+  CreateProductFormValues,
+  UpdateProductFormValues,
+} from "../schemas/productSchemas";
 import { queryClient } from "../lib/queryClient";
 import { toast } from "react-toastify";
 
@@ -55,6 +58,16 @@ export const useCreateProduct = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast.success("Product created successfully");
+    },
+    onError: (
+      error: Error & { response?: { data?: { message?: string } } }
+    ) => {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to create product";
+      toast.error(message);
     },
   });
 };
@@ -81,12 +94,25 @@ export const useUpdateProduct = () => {
     { slug: string; data: UpdateProductFormValues }
   >({
     mutationFn: async ({ slug, data }) => {
-      const res = await updateProduct(slug, data as unknown as UpdateProductInput);
+      const res = await updateProduct(
+        slug,
+        data as unknown as UpdateProductInput
+      );
       return res.data;
     },
     onSuccess: (_, { slug }) => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["product", slug] });
+      toast.success("Product updated successfully");
+    },
+    onError: (
+      error: Error & { response?: { data?: { message?: string } } }
+    ) => {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to update product";
+      toast.error(message);
     },
   });
 };

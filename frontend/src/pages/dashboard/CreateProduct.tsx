@@ -21,8 +21,8 @@ const CreateProduct = () => {
     const { slug } = useParams<{ slug: string }>();
     const isEditMode = !!slug;
 
-    const { mutateAsync: createMutate, isPending: isCreating } = useCreateProduct();
-    const { mutateAsync: updateMutate, isPending: isUpdating } = useUpdateProduct();
+    const { mutate: createMutate, isPending: isCreating } = useCreateProduct();
+    const { mutate: updateMutate, isPending: isUpdating } = useUpdateProduct();
     const { data: existingProduct, isLoading: isLoadingProduct } = useProduct(slug || "");
 
     const [tagValue, setTagValue] = useState("");
@@ -118,20 +118,21 @@ const CreateProduct = () => {
     }
 
     // unified submit handler
-    async function onSubmit(values: ProductForm) {
-        try {
-            if (isEditMode) {
-                if (!slug) return;
-                await updateMutate({ slug, data: values as UpdateProductFormValues });
-                navigate(`/products/${slug}`);
-                return;
-            }
-            const res = await createMutate(values as CreateProductFormValues);
-            toast.success("Product created successfully");
-            navigate(`/products/${res.data.slug}`);
-        } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Submit failed");
+    function onSubmit(values: ProductForm) {
+        if (isEditMode) {
+            if (!slug) return;
+            updateMutate({ slug, data: values as UpdateProductFormValues }, {
+                onSuccess: () => {
+                    navigate(`/products/${slug}`);
+                }
+            });
+            return;
         }
+        createMutate(values as CreateProductFormValues, {
+            onSuccess: (res) => {
+                navigate(`/products/${res.data.slug}`);
+            }
+        });
     }
 
     // Show loading state while fetching product data in edit mode
