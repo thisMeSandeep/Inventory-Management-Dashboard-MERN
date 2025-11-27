@@ -3,7 +3,7 @@ import connectDb from "./config/db.js";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { connectRedis } from "./config/redis.js";
-import { verifyEmailConnection } from "./config/nodemailer.js";
+
 
 const PORT = process.env.PORT || 5000;
 
@@ -34,7 +34,6 @@ httpServer.listen(PORT, async () => {
     await connectDb();
     await connectRedis();
     // Initialize and verify email connection 
-    await verifyEmailConnection();
     console.log(`Server is running on port ${PORT}`);
     console.log(`Socket.IO is ready`);
   } catch (err) {
