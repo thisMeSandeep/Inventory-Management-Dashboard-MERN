@@ -19,7 +19,6 @@ export interface RegisterResponse {
   message: string;
   user: {
     email: string;
-    emailPreviewUrl?: string | null;
   };
 }
 
@@ -42,7 +41,6 @@ export interface EmailVerificationInput {
 export interface EmailVerificationResponse {
   success: boolean;
   message: string;
-  emailPreviewUrl?: string | null;
 }
 
 export interface ForgotPasswordInput {
@@ -52,7 +50,6 @@ export interface ForgotPasswordInput {
 export interface ForgotPasswordResponse {
   success: boolean;
   message: string;
-  emailPreviewUrl?: string | null;
 }
 
 export interface ResetPasswordInput {

@@ -15,7 +15,6 @@ export default function ForgotPassword() {
     const [emailSent, setEmailSent] = useState(false);
     const [submittedEmail, setSubmittedEmail] = useState('');
     const [countdown, setCountdown] = useState(0);
-    const [emailPreviewUrl, setEmailPreviewUrl] = useState<string | null>(null);
     const { mutate: sendResetCode, isPending } = useForgotPassword();
 
     const {
@@ -36,26 +35,18 @@ export default function ForgotPassword() {
 
     const onSubmit = (data: ForgotPasswordFormData) => {
         sendResetCode(data, {
-            onSuccess: (response) => {
+            onSuccess: () => {
                 setSubmittedEmail(data.email);
                 setEmailSent(true);
                 setCountdown(60);
-                // Store preview URL if available
-                if (response.data.emailPreviewUrl) {
-                    setEmailPreviewUrl(response.data.emailPreviewUrl);
-                }
             },
         });
     };
 
     const handleResend = () => {
         sendResetCode({ email: submittedEmail }, {
-            onSuccess: (response) => {
+            onSuccess: () => {
                 setCountdown(60);
-                // Update preview URL if available
-                if (response.data.emailPreviewUrl) {
-                    setEmailPreviewUrl(response.data.emailPreviewUrl);
-                }
             },
         });
     };
@@ -64,7 +55,6 @@ export default function ForgotPassword() {
         return (
             <EmailSentScreen
                 email={submittedEmail}
-                emailPreviewUrl={emailPreviewUrl}
                 onNavigate={() => navigate('/reset-password', { state: { email: submittedEmail } })}
                 onResend={handleResend}
                 isResending={isPending}

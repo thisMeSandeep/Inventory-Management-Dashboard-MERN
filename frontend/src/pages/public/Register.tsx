@@ -32,8 +32,7 @@ export default function RegisterForm() {
         // Navigate to email verification with the registered email and preview URL
         navigate('/verify-email', {
           state: { 
-            email: response.data.user.email,
-            emailPreviewUrl: response.data.user.emailPreviewUrl 
+            email: response.data.user.email
           }
         });
       },

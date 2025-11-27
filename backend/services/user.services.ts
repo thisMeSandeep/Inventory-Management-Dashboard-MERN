@@ -48,7 +48,6 @@ export const registerUser = async (
 
   return { 
     email: user.email,
-    emailPreviewUrl: mailRes.previewUrl, // Ethereal preview URL
   };
 };
 
@@ -122,7 +121,6 @@ export const resendVerificationEmail = async (email: string) => {
   return {
     success: true,
     message: "Verification email sent successfully",
-    emailPreviewUrl: mailRes.previewUrl, // Ethereal preview URL
   };
 };
 
@@ -159,7 +157,6 @@ export const passwordForgot = async (email: string) => {
   return {
     success: true,
     message: "Password reset token sent successfully",
-    emailPreviewUrl: mailRes.previewUrl, // Ethereal preview URL
   };
 };
 

@@ -13,10 +13,8 @@ import { useVerifyEmail, useResendVerification } from '../../hooks/useAuth';
 export default function EmailVerification() {
   const location = useLocation();
   const emailFromState = location.state?.email || '';
-  const emailPreviewUrlFromState = location.state?.emailPreviewUrl || null;
   const [isVerified, setIsVerified] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  const [currentPreviewUrl, setCurrentPreviewUrl] = useState<string | null>(emailPreviewUrlFromState);
 
   const {
     register,
@@ -35,12 +33,8 @@ export default function EmailVerification() {
   const handleResendCode = () => {
     if (emailFromState) {
       resendEmail(emailFromState, {
-        onSuccess: (response) => {
+        onSuccess: () => {
           setCountdown(60); // Start 60 second countdown
-          // Update preview URL if available
-          if (response.data.emailPreviewUrl) {
-            setCurrentPreviewUrl(response.data.emailPreviewUrl);
-          }
         },
       });
     }
@@ -92,21 +86,6 @@ export default function EmailVerification() {
             We've sent a 6-digit verification code to your email.
             <br />Please enter it below.
           </p>
-          {currentPreviewUrl && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-sm text-blue-800 mb-2">
-                Click the link below to view your email:
-              </p>
-              <a
-                href={currentPreviewUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:text-blue-800 underline break-all"
-              >
-                {currentPreviewUrl}
-              </a>
-            </div>
-          )}
         </div>
 
         {/* Form Container */}
