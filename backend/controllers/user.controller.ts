@@ -32,9 +32,7 @@ export const register = async (req: Request, res: Response) => {
 
     return res.status(201).json({
       success: true,
-      message: user.emailPreviewUrl 
-        ? "User registered successfully. Click the preview link to view your verification email."
-        : "User registered successfully. Check your email for verification token.",
+      message: "User registered successfully. Check your email for verification token.",
       user,
     });
   } catch (error: any) {
