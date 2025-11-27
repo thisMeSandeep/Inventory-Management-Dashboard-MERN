@@ -227,6 +227,45 @@ mern/
 
    The frontend will be available at `http://localhost:5173` and the backend at `http://localhost:5000`.
 
+### 🐳 Docker Setup (Alternative)
+
+You can also run the backend using Docker:
+
+1. **Navigate to backend directory:**
+
+   ```bash
+   cd backend
+   ```
+
+2. **Copy environment variables:**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Update `.env` file** with your credentials (MongoDB and Redis URLs)
+
+4. **Start with Docker Compose:**
+
+   ```bash
+   docker-compose up -d
+   ```
+
+5. **View logs:**
+
+   ```bash
+   docker-compose logs -f
+   ```
+
+6. **Stop:**
+   ```bash
+   docker-compose down
+   ```
+
+> **Note:** Make sure MongoDB and Redis are running (locally or cloud). Update your `.env` with the correct connection URLs.
+
+For more details, see [backend/DOCKER.md](backend/DOCKER.md).
+
 ---
 
 ## 🔧 Available Scripts
